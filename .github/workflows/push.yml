@@ -28,7 +28,7 @@ jobs:
         gcc --version
     - name: Install langs package
       run: |
-        raco pkg install --auto langs/
+        raco pkg install --auto .
     - name: Run tests
       run: |
         xvfb-run raco test -p langs
