@@ -1,7 +1,8 @@
 #lang info
 (define version "1.0")
 (define collection 'multi)
-(define deps (list "base" "rackunit" "redex-lib"))
+(define deps (list "base" "rackunit" "redex-lib"
+  "https://github.com/cmsc430/a86.git?path=#main"))
 (define build-deps
   (list "https://github.com/cmsc430/a86.git?path=#main"))
 
