@@ -135,7 +135,7 @@
              (Mov (Offset rbx 0) rax)
              (compile-string-chars (string->list s) 8)
              (Mov rax rbx)
-             (Or rax type-str)
+             (Xor rax type-str)
              (Add rbx
                   (+ 8 (* 4 (if (odd? len) (add1 len) len))))))))
 
@@ -257,7 +257,7 @@
             (Mov (Offset rbx off) rax)
             (Mov rax rbx)
             (Add rax off)
-            (Or rax type-proc)
+            (Xor rax type-proc)
             (Push rax)
             (alloc-defines ds (+ off (* 8 (add1 (length fvs)))))))]))
 
@@ -286,7 +286,7 @@
          (Mov (Offset rbx 0) rax)
          (free-vars-to-heap fvs c 8)
          (Mov rax rbx) ; return value
-         (Or rax type-proc)
+         (Xor rax type-proc)
          (Add rbx (* 8 (add1 (length fvs)))))))
 
 ;; [Listof Id] CEnv Int -> Asm

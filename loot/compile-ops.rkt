@@ -61,9 +61,9 @@
     ['box
      (seq (Mov (Offset rbx 0) rax) ; memory write
           (Mov rax rbx)            ; put box in rax
-          (Or rax type-box)        ; tag as a box
+          (Xor rax type-box)       ; tag as a box
           (Add rbx 8))]
-    
+
     ['unbox
      (seq (assert-box rax)
           (Xor rax type-box)
@@ -76,7 +76,7 @@
      (seq (assert-cons rax)
           (Xor rax type-cons)
           (Mov rax (Offset rax 0)))]
-    
+
     ['empty? (seq (Cmp rax (value->bits '())) if-equal)]
     ['cons? (type-pred ptr-mask type-cons)]
     ['box?  (type-pred ptr-mask type-box)]
@@ -141,7 +141,7 @@
           (Pop rax)
           (Mov (Offset rbx 8) rax)
           (Mov rax rbx)
-          (Or rax type-cons)
+          (Xor rax type-cons)
           (Add rbx 16))]
     ['eq?
      (seq (Pop r8)
@@ -157,7 +157,7 @@
             (Je empty)
 
             (Mov r9 rbx)
-            (Or r9 type-vect)
+            (Xor r9 type-vect)
 
             (Sar r8 int-shift)
             (Mov (Offset rbx 0) r8)
@@ -204,7 +204,7 @@
             (Je empty)
 
             (Mov r9 rbx)
-            (Or r9 type-str)
+            (Xor r9 type-str)
 
             (Sar r8 int-shift)
             (Mov (Offset rbx 0) r8)
@@ -247,7 +247,7 @@
           (Add r8 rax)
           (Mov 'eax (Offset r8 8))
           (Sal rax char-shift)
-          (Or rax type-char))]))
+          (Xor rax type-char))]))
 
 ;; Op3 -> Asm
 (define (compile-op3 p)

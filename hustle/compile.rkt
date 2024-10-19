@@ -25,8 +25,8 @@
         ;; recv heap pointer
         (Mov rbx rdi)
         (compile-e e '())
-        (Pop rbx)
         ;; restore callee-save register
+        (Pop rbx)
         (Pop r15)
         (Ret)
         ;; Error handler

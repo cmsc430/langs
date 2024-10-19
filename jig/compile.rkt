@@ -91,7 +91,7 @@
              (Mov (Offset rbx 0) rax)
              (compile-string-chars (string->list s) 8)
              (Mov rax rbx)
-             (Or rax type-str)
+             (Xor rax type-str)
              (Add rbx
                   (+ 8 (* 4 (if (odd? len) (add1 len) len))))))))
 
