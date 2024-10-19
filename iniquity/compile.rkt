@@ -79,7 +79,7 @@
 ;; Id CEnv -> Asm
 (define (compile-variable x c)
   (let ((i (lookup x c)))
-    (seq (Mov rax (Offset rsp i)))))
+    (seq (Mov rax (Mem (Plus rsp i))))))
 
 ;; String -> Asm
 (define (compile-string s)
@@ -87,10 +87,10 @@
     (if (zero? len)
         (seq (Mov rax type-str))
         (seq (Mov rax len)
-             (Mov (Offset rbx 0) rax)
+             (Mov (Mem rbx) rax)
              (compile-string-chars (string->list s) 8)
              (Mov rax rbx)
-             (Or rax type-str)
+             (Xor rax type-str)
              (Add rbx
                   (+ 8 (* 4 (if (odd? len) (add1 len) len))))))))
 
@@ -100,7 +100,7 @@
     ['() (seq)]
     [(cons c cs)
      (seq (Mov rax (char->integer c))
-          (Mov (Offset rbx i) 'eax)
+          (Mov (Mem (Plus rbx i)) 'eax)
           (compile-string-chars cs (+ 4 i)))]))
 
 ;; Op0 -> Asm

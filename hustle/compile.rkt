@@ -25,8 +25,8 @@
         ;; recv heap pointer
         (Mov rbx rdi)
         (compile-e e '())
-        (Pop rbx)
         ;; restore callee-save register
+        (Pop rbx)
         (Pop r15)
         (Ret)
         ;; Error handler
@@ -58,7 +58,7 @@
 ;; Id CEnv -> Asm
 (define (compile-variable x c)
   (let ((i (lookup x c)))
-    (seq (Mov rax (Offset rsp i)))))
+    (seq (Mov rax (Mem (Plus rsp i))))))
 
 ;; Op0 -> Asm
 (define (compile-prim0 p)

@@ -57,24 +57,24 @@
           unpad-stack)]
 
     ['box
-     (seq (Mov (Offset rbx 0) rax) ; memory write
-          (Mov rax rbx)            ; put box in rax
-          (Or rax type-box)        ; tag as a box
+     (seq (Mov (Mem rbx) rax) ; memory write
+          (Mov rax rbx)       ; put box in rax
+          (Xor rax type-box)  ; tag as a box
           (Add rbx 8))]
-    
+
     ['unbox
      (seq (assert-box rax)
           (Xor rax type-box)
-          (Mov rax (Offset rax 0)))]
+          (Mov rax (Mem rax)))]
     ['car
      (seq (assert-cons rax)
           (Xor rax type-cons)
-          (Mov rax (Offset rax 8)))]
+          (Mov rax (Mem (Plus rax 8))))]
     ['cdr
      (seq (assert-cons rax)
           (Xor rax type-cons)
-          (Mov rax (Offset rax 0)))]
-    
+          (Mov rax (Mem rax)))]
+
     ['empty? (seq (Cmp rax (value->bits '())) if-equal)]
     ['cons? (type-pred ptr-mask type-cons)]
     ['box?  (type-pred ptr-mask type-box)]))
@@ -107,11 +107,11 @@
           (Cmp r8 rax)
           if-equal)]
     ['cons
-     (seq (Mov (Offset rbx 0) rax)
+     (seq (Mov (Mem rbx) rax)
           (Pop rax)
-          (Mov (Offset rbx 8) rax)
+          (Mov (Mem (Plus rbx 8)) rax)
           (Mov rax rbx)
-          (Or rax type-cons)
+          (Xor rax type-cons)
           (Add rbx 16))]
     ['eq?
      (seq (Pop r8)
