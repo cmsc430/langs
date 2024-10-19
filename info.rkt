@@ -4,7 +4,7 @@
 (define deps (list "base" "rackunit" "redex-lib"
   "https://github.com/cmsc430/a86.git?path=#main"))
 (define build-deps
-  (list "https://github.com/cmsc430/a86.git?path=#main"))
+  (list "https://github.com/cmsc430/a86.git?path=#effective-address"))
 
 ;; Outlaw is omitted here because it depends on libraries that are a pain
 ;; to ensure are set up properly and we don't want students to see failing
