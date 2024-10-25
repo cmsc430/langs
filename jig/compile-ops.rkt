@@ -57,13 +57,11 @@
           (Mov rdi rax)
           (Call 'write_byte)
           unpad-stack)]
-
     ['box
      (seq (Mov (Offset rbx 0) rax) ; memory write
           (Mov rax rbx)            ; put box in rax
           (Xor rax type-box)       ; tag as a box
           (Add rbx 8))]
-
     ['unbox
      (seq (assert-box rax)
           (Xor rax type-box)
