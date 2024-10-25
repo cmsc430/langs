@@ -161,7 +161,8 @@
     (check-equal? (run '(string? (cons 1 2))) #f)
     (check-equal? (run '(begin (make-string 3 #\f)
                                (make-string 3 #\f)))
-                  "fff")))
+                  "fff")
+    (check-equal? (run '(vector-set! (make-vector 0 #f) 0 #t)) 'err)))
 
 (define (test/io run)
   (begin ;; Evildoer

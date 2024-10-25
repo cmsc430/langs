@@ -255,6 +255,8 @@
           (Pop r8)
           (assert-vector r8)
           (assert-integer r10)
+          (Cmp r8 type-vect)
+          (Je 'err)
           (Cmp r10 0)
           (Jl 'err)
           (Xor r8 type-vect)       ; r8 = ptr
