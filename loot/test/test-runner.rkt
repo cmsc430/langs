@@ -233,7 +233,9 @@
       (check-equal? (run '(match (box 1) [(box 2) 0] [_ 1]))
                     1)
       (check-equal? (run '(match (box 1) [(box x) x] [_ 2]))
-                    1)))
+                    1)
+      (check-equal? (run '(match 1 [8589934592 1] [_ 2])) 2)
+      (check-equal? (run '(match 8589934592 [8589934592 1] [_ 2])) 1)))
 
 (define (test/io run)
   (begin ;; Evildoer

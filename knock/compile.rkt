@@ -233,7 +233,9 @@
      (list (seq (Push rax)) (cons x cm))]
     [(Lit l)
      (let ((ok (gensym)))
-       (list (seq (Cmp rax (value->bits l))
+       (list (seq (Mov r8 rax)
+                  (compile-value l)
+                  (Cmp rax r8)
                   (Je ok)
                   (Add rsp (* 8 (length cm)))
                   (Jmp next)
