@@ -31,4 +31,4 @@ jobs:
         raco pkg install --auto ../langs/
     - name: Run tests
       run: |
-        xvfb-run raco test -p langs
+        raco test -p langs
