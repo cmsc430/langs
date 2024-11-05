@@ -24,8 +24,7 @@
   (match p
     [(Prog ds e)
      (interp-env e '() ds)]))
-
-;; Expr Env -> Answer
+;; Expr Env Defns -> Answer
 (define (interp-env e r ds)
   (match e
     [(Lit d) d]
