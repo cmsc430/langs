@@ -33,6 +33,6 @@ jobs:
       run: |
         if [ "${{ matrix.os }}" == "macos-latest" ]; then
           raco test -p langs
-	else
+        else
           xvfb-run raco test -p langs
         fi
