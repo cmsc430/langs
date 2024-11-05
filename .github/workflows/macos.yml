@@ -6,15 +6,15 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-20.04, ubuntu-22.04]
-        racket-variant: ['BC', 'CS']
-        racket-version: ['8.6', '8.8', '8.14']
+        os: [macos-latest]
+        racket-variant: ['CS']
+        racket-version: ['8.6']
     name: Test on Racket ${{ matrix.racket-variant }} ${{ matrix.racket-version }} on ${{ matrix.os }}	
     steps:
     - name: Checkout
       uses: actions/checkout@main
     - name: Install nasm
-      run: sudo apt-get install nasm
+      run: brew install nasm
     - name: Install Racket
       uses: Bogdanp/setup-racket@v1.11
       with:
@@ -31,4 +31,4 @@ jobs:
         raco pkg install --auto ../langs/
     - name: Run tests
       run: |
-        xvfb-run raco test -p langs
+        raco test -p langs
