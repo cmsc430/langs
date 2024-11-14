@@ -113,7 +113,6 @@
      (match (interp-match-pat p v r)
        [#f (interp-match v ps es r ds)]
        [r  (interp-env e r ds)])]))
-
 ;; Pat Value Env -> [Maybe Env]
 (define (interp-match-pat p v r)
   (match p

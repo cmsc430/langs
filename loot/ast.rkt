@@ -1,7 +1,8 @@
 #lang racket
 (provide Lit Prim0 Prim1 Prim2 Prim3 If Eof Begin
          Let Var Prog Defn App
-         Match Box Cons Conj Lam)
+         Match Box Cons Conj
+         Lam)
 
 ;; type Prog = (Prog (Listof Defn) Expr)
 (struct Prog (ds e) #:prefab)

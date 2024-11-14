@@ -24,9 +24,9 @@
 ;; S-Expr -> Expr
 (define (parse-e s)
   (match s
+    [(? datum?)               (Lit s)]
     ['eof                     (Eof)]
     [(? symbol?)              (Var s)]
-    [(? datum?)               (Lit s)]
     [(list 'quote (list))     (Lit '())]
     [(list (? op0? p0))       (Prim0 p0)]
     [(list (? op1? p1) e)     (Prim1 p1 (parse-e e))]
