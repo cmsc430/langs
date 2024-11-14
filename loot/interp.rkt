@@ -73,7 +73,7 @@
           [vs
            (if (procedure? f)
                (apply f vs)
-               'err)])])]     
+               'err)])])]
     [(Match e ps es)
      (match (interp-env e r ds)
        ['err 'err]
@@ -84,7 +84,7 @@
        ; check arity matches
        (if (= (length xs) (length vs))
            (interp-env e (append (zip xs vs) r) ds)
-           'err))]))       
+           'err))]))
 
 ;; (Listof Expr) REnv Defns -> (Listof Value) | 'err
 (define (interp-env* es r ds)
