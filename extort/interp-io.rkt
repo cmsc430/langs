@@ -1,10 +1,9 @@
 #lang racket
 (provide interp/io)
 (require "interp.rkt")
-
-;; String Expr -> (Cons Value String)
+;; String Expr -> (Cons Answer String)
 ;; Interpret e with given string as input,
-;; return value and collected output as string
+;; return answer and collected output as string
 (define (interp/io e input)
   (define result (box #f))
   (define output

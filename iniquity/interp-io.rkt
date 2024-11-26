@@ -3,7 +3,7 @@
 (require "interp.rkt")
 ;; String Prog -> (Cons Value String)
 ;; Interpret p with given string as input,
-;; return value and collected output as string
+;; return answer and collected output as string
 (define (interp/io p input)
   (define result (box #f))
   (define output

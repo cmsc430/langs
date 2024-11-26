@@ -14,6 +14,8 @@
 ;; | (cons Value Value)
 ;; | (box Value)
 
+;; type Answer = Value | 'err
+
 ;; type Env = (Listof (List Id Value))
 ;; Expr -> Answer
 (define (interp e)

@@ -16,6 +16,8 @@
 ;; | (string Character ...)
 ;; | (vector Value ...)
 
+;; type Answer = Value | 'err
+
 ;; type Env = (Listof (List Id Value))
 ;; Expr -> Answer
 (define (interp e)

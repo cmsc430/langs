@@ -9,6 +9,8 @@
 ;; | Character
 ;; | Eof
 ;; | Void
+
+;; type Answer = Value | 'err
 ;; Expr -> Answer
 (define (interp e)
   (match e

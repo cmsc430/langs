@@ -1,7 +1,6 @@
 #lang racket
 (require a86/interp)
 (require "compile.rkt")
-(require "interp-io.rkt")
 (require "types.rkt")
 (require "build-runtime.rkt")
 (provide exec/io)
