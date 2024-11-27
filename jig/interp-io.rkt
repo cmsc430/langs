@@ -1,7 +1,7 @@
 #lang racket
 (provide interp/io)
 (require "interp.rkt")
-;; String Prog -> (Cons Value String)
+;; String Prog -> (Cons Answer String)
 ;; Interpret p with given string as input,
 ;; return answer and collected output as string
 (define (interp/io p input)
