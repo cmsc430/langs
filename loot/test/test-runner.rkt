@@ -236,7 +236,52 @@
       (check-equal? (run '(match (box 1) [(box x) x] [_ 2]))
                     1)
       (check-equal? (run '(match 1 [8589934592 1] [_ 2])) 2)
-      (check-equal? (run '(match 8589934592 [8589934592 1] [_ 2])) 1)))
+      (check-equal? (run '(match 8589934592 [8589934592 1] [_ 2])) 1))
+
+  (begin ;; Loot
+    (check-true (procedure? (run '(λ (x) x))))
+    (check-equal? (run '((λ (x) x) 5))
+                  5)
+
+    (check-equal? (run '(let ((f (λ (x) x))) (f 5)))
+                  5)
+    (check-equal? (run '(let ((f (λ (x y) x))) (f 5 7)))
+                  5)
+    (check-equal? (run '(let ((f (λ (x y) y))) (f 5 7)))
+                  7)
+    (check-equal? (run '((let ((x 1))
+                           (let ((y 2))
+                             (lambda (z) (cons x (cons y (cons z '()))))))
+                         3))
+                  '(1 2 3))
+    (check-equal? (run '(define (adder n)
+                          (λ (x) (+ x n)))
+                       '((adder 5) 10))
+                  15)
+    (check-equal? (run '(((λ (t)
+                            ((λ (f) (t (λ (z) ((f f) z))))
+                             (λ (f) (t (λ (z) ((f f) z))))))
+                          (λ (tri)
+                            (λ (n)
+                              (if (zero? n)
+                                  0
+                                  (+ n (tri (sub1 n)))))))
+                         36))
+                  666)
+    (check-equal? (run '(define (tri n)
+                          (if (zero? n)
+                              0
+                              (+ n (tri (sub1 n)))))
+                       '(tri 36))
+                  666)
+    (check-equal? (run '(define (tri n)
+                          (match n
+                            [0 0]
+                            [m (+ m (tri (sub1 m)))]))
+                       '(tri 36))
+                  666)
+    (check-equal? (run '((match 8 [8 (lambda (x) x)]) 12))
+                  12)))
 
 (define (test/io run)
   (begin ;; Evildoer
@@ -320,5 +365,14 @@
     (check-equal? (run ""
                        '(match (write-byte 97)
                           [_ 1]))
-                  (cons 1 "a"))))
+                  (cons 1 "a")))
+
+  (begin ;; Loot
+    (check-equal? (run ""
+                       '((begin (write-byte 97)
+                                (λ (x)
+                                  (begin (write-byte x)
+                                         (write-byte 99))))
+                         98))
+                  (cons (void) "abc"))))
 
