@@ -2,20 +2,23 @@
 (provide parse parse-closed)
 (require "ast.rkt")
 
-;; S-Expr -> Expr
+;; s:S-Expr -> e:ClosedExpr
+;; Parse s into (a potentially open) expr e
 (define (parse s)
   (match (parse/acc s '() '())
     [(list _ e) e]))
 
-;; S-Expr -> ClosedExpr
+;; s:S-Expr -> e:ClosedExpr
+;; Parse s into closed expr e; signal an error when e is open
 (define (parse-closed s)
   (match (parse/acc s '() '())
     [(list '() e) e]
     [(list fvs e) (error "unbound identifiers" fvs)]))
 
-;; S-Expr [Listof Id] [Listof Id] -> (list [Listof Id] Expr)
-;; Parse s into expr and list of free variables
-;; assuming bvs are bound, fvs are free
+;; s:S-Expr bvs:[Listof Id] fvs:[Listof Id]
+;;   -> (list fvs-e:[Listof Id] e:Expr)
+;; Parse s into expr e and list of free variables fvs-e,
+;; assuming variables in bvs are bound and fvs are free.
 (define (parse/acc s bvs fvs)
   (define (rec s bvs fvs)
     (match s
@@ -52,7 +55,10 @@
       [_ (error "parse error" s)]))
   (rec s bvs fvs))
 
-;; S-Expr [Listof Id] [Listof Id] -> (list [Listof Id] [Listof Expr])
+;; s:S-Expr bvs:[Listof Id] fvs:[Listof Id]
+;;   -> (list fvs-e:[Listof Id] es:[Listof Expr])
+;; Parse s into a list of expr es and list of free variables fvs-e,
+;; assuming variables in bvs are bound and fvs are free.
 (define (parse-es/acc s bvs fvs)
   (match s
     ['() (list fvs '())]
@@ -64,10 +70,10 @@
            (list fvs (cons e es))])])]
     [_ (error "parse error")]))
 
-;; [Listof Any] -> (Any -> Boolean)
-(define (not-in m)
-  (λ (x) (not (memq x m))))
-
+;; xs:[Listof Any] -> p:(x:Any -> Boolean)
+;; Produce a predicate p for things not in xs
+(define (not-in xs)
+  (λ (x) (not (memq x xs))))
 
 ;; Any -> Boolean
 (define (datum? x)

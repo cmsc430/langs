@@ -31,7 +31,6 @@
        [_ (error "parse error" s)])]
     [_ (error "parse error" s)]))
 
-
 ;; Any -> Boolean
 (define (datum? x)
   (or (exact-integer? x)
