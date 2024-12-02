@@ -14,9 +14,9 @@
     [(list 'eof-object? v)                (cons h (eof-object? v))]
     [(list 'write-byte (? byte?))         (cons h (write-byte v))]
     [(list 'box v)                        (alloc-box v h)]
-    [(list 'unbox (list 'box i))          (cons h (heap-ref h i))]
-    [(list 'car   (list 'cons i))         (cons h (heap-ref h i))]
-    [(list 'cdr   (list 'cons i))         (cons h (heap-ref h (add1 i)))]
+    [(list 'unbox (box-ptr i))            (cons h (heap-ref h i))]
+    [(list 'car   (cons-ptr i))           (cons h (heap-ref h i))]
+    [(list 'cdr   (cons-ptr i))           (cons h (heap-ref h (add1 i)))]
     [(list 'empty? v)                     (cons h (empty? v))]
     [_                                    'err]))
 
@@ -26,7 +26,7 @@
     [(list '+ (? integer? i1) (? integer? i2)) (cons h (+ i1 i2))]
     [(list '- (? integer? i1) (? integer? i2)) (cons h (- i1 i2))]
     [(list '< (? integer? i1) (? integer? i2)) (cons h (< i1 i2))]
-    [(list '= (? integer? i1) (? integer? i2)) (cons h (= i1 i2))]    
+    [(list '= (? integer? i1) (? integer? i2)) (cons h (= i1 i2))]
     [(list 'eq? v1 v2)
      (match (list v1 v2)
        [(list (list t1 a1)  (list t2 a2)) (cons h (and (eq? t1 t2) (= a1 a2)))]
