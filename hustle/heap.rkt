@@ -1,5 +1,5 @@
 #lang racket
-(provide alloc-box alloc-cons alloc-str heap-ref heap-set)
+(provide alloc-box alloc-cons heap-ref heap-set)
 
 ;; Value* Heap -> Answer*
 (define (alloc-box v h)
@@ -10,11 +10,6 @@
 (define (alloc-cons v1 v2 h)
   (cons (cons v2 (cons v1 h))
         (list 'cons (length h))))
-
-;; String Heap -> Answer*
-(define (alloc-str s h)
-  (cons (append (reverse (string->list s)) (list (string-length s)) h)
-        (list 'str (length h))))
 
 ;; Heap Address -> Value*
 (define (heap-ref h a)
