@@ -8,5 +8,6 @@
 ;; print result on stdout
 (define (main)
   (read-line) ; ignore #lang racket line
-  (println (interp (parse (read)))))
+  (println (interp
+                   (parse-closed (read)))))
 

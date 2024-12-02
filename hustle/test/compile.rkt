@@ -4,8 +4,6 @@
 (require "../exec.rkt")
 (require "../exec-io.rkt")
 (require "test-runner.rkt")
-
-(test (λ (e) (exec (parse e))))
-
-(test/io (λ (i e) (exec/io (parse e) i)))
+(test (λ (e) (exec (parse-closed e))))
+(test/io (λ (i e) (exec/io (parse-closed e) i)))
 

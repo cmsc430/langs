@@ -23,6 +23,8 @@
 ;;           | (Match Expr (Listof Pat) (Listof Expr))
 ;;           | (Lam Id (Listof Id) Expr)
 
+;; type ClosedExpr = { e ∈ Expr | e contains no free variables }
+
 ;; type Id  = Symbol
 ;; type Datum = Integer
 ;;            | Boolean
