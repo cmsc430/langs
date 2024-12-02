@@ -17,6 +17,8 @@
 ;; | (string Character ...)
 ;; | (vector Value ...)
 
+;; type Answer = Value | 'err
+
 ;; type Env = (Listof (List Id Value))
 ;; Prog -> Answer
 (define (interp p)

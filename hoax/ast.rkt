@@ -12,6 +12,8 @@
 ;;           | (Let Id Expr Expr)
 ;;           | (Var Id)
 
+;; type ClosedExpr = { e ∈ Expr | e contains no free variables }
+
 ;; type Id  = Symbol
 ;; type Datum = Integer
 ;;            | Boolean

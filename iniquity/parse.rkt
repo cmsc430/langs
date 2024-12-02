@@ -1,47 +1,176 @@
 #lang racket
-(provide parse parse-e parse-define)
+(provide parse parse-closed parse-e parse-define)
 (require "ast.rkt")
 
-;; S-Expr ... -> Prog
-(define (parse . s)
-  (match s
-    [(cons (and (cons 'define _) d) s)
-     (match (apply parse s)
-       [(Prog ds e)
-        (Prog (cons (parse-define d) ds) e)])]
-    [(cons e '()) (Prog '() (parse-e e))]
-    [_ (error "program parse error")]))
+;; [Listof S-Expr] -> Prog
+(define (parse . ss)
+  (match (parse-prog ss (parse-defn-names ss) '() '() '())
+    [(list _ _ p) p]))
 
-;; S-Expr -> Defn
-(define (parse-define s)
-  (match s
-    [(list 'define (list-rest (? symbol? f) xs) e)
-     (if (andmap symbol? xs)
-         (Defn f xs (parse-e e))
-         (error "parse definition error"))]
-    [_ (error "Parse defn error" s)]))
+;; [Listof S-Expr] -> ClosedProg
+(define (parse-closed . ss)
+  (match (parse-prog ss (parse-defn-names ss) '() '() '())
+    [(list '() '() p) p]
+    [(list ys gs p) (error "undefined identifiers" (append ys gs))]))
 
 ;; S-Expr -> Expr
+;; Parse a (potentially open) expression
 (define (parse-e s)
+  (match (parse-e/acc s '() '() '() '())
+    [(list _ _ e) e]))
+
+;; S-Expr -> Expr
+;; Parse a (potentially open) definition
+(define (parse-define s)
+  (match (parse-define/acc s '() '() '() '())
+    [(list _ _ d) d]))
+
+;; S-Expr -> r:[Listof Id]
+;;   where: (distinct? r)
+;; Extracts defined function names from given program-like s-expr
+;; Does not fully parse definition
+;; Example:
+;;   (parse-defn-names '((define (f x) x) (define (g y) y) 1) -> '(f g)
+(define (parse-defn-names ss)
+  (define (rec ss fs)
+    (match ss
+      [(list s) fs]
+      [(cons (cons 'define sd) sr)
+       (match (parse-defn-name sd)
+         [f (if (memq f fs)
+                (error "duplicate definition" f)
+                (rec sr (cons f fs)))])]
+      [_ (error "parse error")]))
+  (rec ss '()))
+
+(define (parse-defn-name s)
   (match s
-    [(? datum?)               (Lit s)]
-    ['eof                     (Eof)]
-    [(? symbol?)              (Var s)]
-    [(list 'quote (list))     (Lit '())]
-    [(list (? op0? p0))       (Prim0 p0)]
-    [(list (? op1? p1) e)     (Prim1 p1 (parse-e e))]
-    [(list (? op2? p2) e1 e2) (Prim2 p2 (parse-e e1) (parse-e e2))]
-    [(list (? op3? p3) e1 e2 e3)
-     (Prim3 p3 (parse-e e1) (parse-e e2) (parse-e e3))]
-    [(list 'begin e1 e2)
-     (Begin (parse-e e1) (parse-e e2))]
-    [(list 'if e1 e2 e3)
-     (If (parse-e e1) (parse-e e2) (parse-e e3))]
-    [(list 'let (list (list (? symbol? x) e1)) e2)
-     (Let x (parse-e e1) (parse-e e2))]
-    [(cons (? symbol? f) es)
-     (App f (map parse-e es))]
-    [_ (error "Parse error" s)]))
+    [(cons (cons (? symbol? f) _) _) f]
+    [_ (error "parse error")]))
+
+;; S-Expr [Listof Id] [Listof Id] [Listof Id] [Listof Id] -> (list [Listof Id] [Listof Id] Prog)
+;;   s: program shaped s-expr to be parsed
+;;   fs: defined function names
+;;   xs: bound variables
+;;   ys: free variables
+;;   gs: undefined function names
+;; returns list of free variables, undefined function names, and parse of program
+(define (parse-prog s fs xs ys gs)
+  (match s
+    [(list s)
+     (match (parse-e/acc s fs xs ys gs)
+       [(list ys gs e)
+        (list ys gs (Prog '() e))])]
+    [(cons s ss)
+     (match (parse-define/acc s fs xs ys gs)
+       [(list ys gs (and d (Defn f _ _)))
+        (match (parse-prog ss (cons f fs) xs ys gs)
+          [(list ys gs (Prog ds e))
+           (list ys gs (Prog (cons d ds) e))])])]))
+
+
+;; S-Expr [Listof Id] [Listof Id] [Listof Id] [Listof Id] -> (list [Listof Id] [Listof Id] Defn)
+;;   s: definition shaped s-expr to be parsed
+;;   fs: defined function names
+;;   xs: bound variables
+;;   ys: free variables
+;;   gs: undefined function names
+;; returns list of free variables, undefined function names, and parse of definition
+(define (parse-define/acc s fs xs ys gs)
+  (match s
+    [(cons 'define sr)
+     (match sr
+       [(list (cons (? symbol? g) (and (list (? symbol? zs) ...) (? distinct?)))  s)
+        (match (parse-e/acc s (cons g fs) (append zs xs) ys gs)
+          [(list ys gs e)
+           (list ys gs (Defn g zs e))])]
+       [_ (error "parse error")])]
+    [_ (error "parse error")]))
+
+;; S-Expr [Listof Id] [Listof Id] [Listof Id] [Listof Id] -> (list [Listof Id] [Listof Id] Expr)
+;;   s: expression shaped s-expr to be parsed
+;;   fs: defined function names
+;;   xs: bound variables
+;;   ys: free variables
+;;   gs: undefined function names
+;; returns list of free variables, undefined function names, and parse of expression
+(define (parse-e/acc s fs xs ys gs)
+  (define (rec s xs ys gs)
+    (define ns (append fs xs))
+    (match s
+      [(and 'eof (? (not-in ns)))
+       (list ys gs (Eof))]
+      [(? datum?)
+       (list ys gs (Lit s))]
+      [(list 'quote (list))
+       (list ys gs (Lit '()))]
+      [(? symbol? (? (not-in fs)))
+       (if (memq s xs)
+           (list ys gs (Var s))
+           (list (cons s ys) gs (Var s)))]
+      [(list-rest (? symbol? (? (not-in ns) k)) sr)
+       (match k
+         ['let
+          (match sr
+            [(list (list (list (? symbol? x) s1)) s2)
+             (match (rec s1 xs ys gs)
+               [(list ys gs e1)
+                (match (rec s2 (cons x xs) ys gs)
+                  [(list ys gs e2)
+                   (list ys gs (Let x e1 e2))])])]
+            [_ (error "let: bad syntax" s)])]
+         [_
+          (match (parse-es/acc sr fs xs ys gs)
+            [(list ys gs es)
+             (match (cons k es)
+               [(list (? op0? o))
+                (list ys gs (Prim0 o))]
+               [(list (? op1? o) e1)
+                (list ys gs (Prim1 o e1))]
+               [(list (? op2? o) e1 e2)
+                (list ys gs (Prim2 o e1 e2))]
+               [(list (? op3? o) e1 e2 e3)
+                (list ys gs (Prim3 o e1 e2 e3))]
+               [(list 'begin e1 e2)
+                (list ys gs (Begin e1 e2))]
+               [(list 'if e1 e2 e3)
+                (list ys gs (If e1 e2 e3))]
+               [(list-rest g es)
+                (list ys (cons g gs) (App g es))])])])]
+      [(list-rest (? symbol? g) sr)
+       (match (parse-es/acc sr fs xs ys gs)
+         [(list ys s es)
+          (list ys (if (memq g fs) gs (cons g gs)) (App g es))])]
+      [_
+       (error "parse error" s)]))
+  (rec s xs ys gs))
+
+;; S-Expr [Listof Id] [Listof Id] [Listof Id] [Listof Id] -> (list [Listof Id] [Listof Id] [Listof Expr])
+;;   s: list of expressions shaped s-expr to be parsed
+;;   fs: defined function names
+;;   xs: bound variables
+;;   ys: free variables
+;;   gs: undefined function names
+;; returns list of free variables, undefined function names, and list of parsed expressions
+(define (parse-es/acc s fs xs ys gs)
+  (match s
+    ['() (list ys gs '())]
+    [(cons s ss)
+     (match (parse-e/acc s fs xs ys gs)
+       [(list ys gs e)
+        (match (parse-es/acc ss fs xs ys gs)
+          [(list ys gs es)
+           (list ys gs (cons e es))])])]
+    [_ (error "parse error")]))
+
+(define (distinct? xs)
+  (not (check-duplicates xs)))
+
+;; [Listof Any] -> (Any -> Boolean)
+(define (not-in m)
+  (λ (x) (not (memq x m))))
+(define (in m)
+  (λ (x) (memq x m)))
 
 
 ;; Any -> Boolean

@@ -45,8 +45,7 @@
           (Mov rdi rax)
           (Call 'write_byte))]))
 
-
-;; -> Asm
+;; Asm
 ;; set rax to #t or #f if comparison flag is equal
 (define if-equal
   (seq (Mov rax (value->bits #f))

@@ -10,8 +10,7 @@
 (define rsp 'rsp) ; stack
 (define rdi 'rdi) ; arg
 (define r15 'r15) ; stack pad (non-volatile)
-
-;; Expr -> Asm
+;; ClosedExpr -> Asm
 (define (compile e)
   (prog (Global 'entry)
         (Extern 'peek_byte)
@@ -36,7 +35,7 @@
 
 ;; type CEnv = (Listof [Maybe Id])
 ;; Expr CEnv -> Asm
-(define (compile-e e c)
+(define (compile-e e c)  ;; where c closes e
   (match e
     [(Lit d) (compile-value d)]
     [(Eof) (compile-value eof)]

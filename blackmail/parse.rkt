@@ -6,8 +6,15 @@
 (define (parse s)
   (match s
     [(? exact-integer?) (Lit s)]
-    [(list (? op1? o) e) (Prim1 o (parse e))]
-    [_ (error "Parse error")]))
+    [(list-rest (? symbol? k) sr)
+     (match k
+       [(? op1? o)
+        (match sr
+          [(list s1)
+           (Prim1 o (parse s1))]
+          [_ (error "op1: bad syntax" s)])]
+       [_ (error "parse error" s)])]
+    [_ (error "parse error" s)]))
 
 (define (op1? x)
   (memq x '(add1 sub1)))

@@ -18,6 +18,8 @@
 ;; | (vector Value ...)
 ;; | (Value ... -> Answer)
 
+;; type Answer = Value | 'err
+
 ;; type Env = (Listof (List Id Value))
 ;; Prog -> Answer
 (define (interp p)

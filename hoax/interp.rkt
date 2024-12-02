@@ -16,13 +16,15 @@
 ;; | (string Character ...)
 ;; | (vector Value ...)
 
+;; type Answer = Value | 'err
+
 ;; type Env = (Listof (List Id Value))
-;; Expr -> Answer
+;; ClosedExpr -> Answer
 (define (interp e)
   (interp-env e '()))
 
 ;; Expr Env -> Answer
-(define (interp-env e r)
+(define (interp-env e r) ;; where r closes e
   (match e
     [(Lit d) d]
     [(Eof)   eof]

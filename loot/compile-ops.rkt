@@ -2,6 +2,7 @@
 (provide compile-op0 compile-op1 compile-op2 compile-op3 pad-stack assert-proc)
 (require "ast.rkt")
 (require "types.rkt")
+(require "assert.rkt")
 (require a86/ast)
 
 (define rax 'rax)
@@ -44,7 +45,7 @@
           (Sar rax char-shift)
           (Sal rax int-shift))]
     ['integer->char
-     (seq (assert-codepoint)
+     (seq (assert-codepoint rax)
           (Sar rax int-shift)
           (Sal rax char-shift)
           (Xor rax type-char))]
@@ -52,7 +53,7 @@
      (seq (Cmp rax (value->bits eof))
           if-equal)]
     ['write-byte
-     (seq assert-byte
+     (seq (assert-byte rax)
           pad-stack
           (Mov rdi rax)
           (Call 'write_byte)
@@ -270,73 +271,25 @@
           (Mov (Offset r8 8) rax)
           (Mov rax (value->bits (void))))]))
 
+(define (type-pred mask type)
+  (seq (And rax mask)
+       (Cmp rax type)
+       if-equal))
 
-;; -> Asm
+;; Asm
 ;; set rax to #t or #f if comparison flag is equal
 (define if-equal
   (seq (Mov rax (value->bits #f))
        (Mov r9  (value->bits #t))
        (Cmove rax r9)))
 
-;; -> Asm
+;; Asm
 ;; set rax to #t or #f if comparison flag is less than
 (define if-lt
   (seq (Mov rax (value->bits #f))
        (Mov r9  (value->bits #t))
        (Cmovl rax r9)))
 
-(define (assert-type mask type)
-  (λ (arg)
-    (seq (Mov r9 arg)
-         (And r9 mask)
-         (Cmp r9 type)
-         (Jne 'err))))
-
-(define (type-pred mask type)
-  (seq (And rax mask)
-       (Cmp rax type)
-       if-equal))
-
-(define assert-integer
-  (assert-type mask-int type-int))
-(define assert-char
-  (assert-type mask-char type-char))
-(define assert-box
-  (assert-type ptr-mask type-box))
-(define assert-cons
-  (assert-type ptr-mask type-cons))
-(define assert-vector
-  (assert-type ptr-mask type-vect))
-(define assert-string
-  (assert-type ptr-mask type-str))
-(define assert-proc
-  (assert-type ptr-mask type-proc))
-
-(define (assert-codepoint)
-  (let ((ok (gensym)))
-    (seq (assert-integer rax)
-         (Cmp rax (value->bits 0))
-         (Jl 'err)
-         (Cmp rax (value->bits 1114111))
-         (Jg 'err)
-         (Cmp rax (value->bits 55295))
-         (Jl ok)
-         (Cmp rax (value->bits 57344))
-         (Jg ok)
-         (Jmp 'err)
-         (Label ok))))
-
-(define assert-byte
-  (seq (assert-integer rax)
-       (Cmp rax (value->bits 0))
-       (Jl 'err)
-       (Cmp rax (value->bits 255))
-       (Jg 'err)))
-
-(define (assert-natural r)
-  (seq (assert-integer r)
-       (Cmp r (value->bits 0))
-       (Jl 'err)))
 
 ;; Asm
 ;; Dynamically pad the stack to be aligned for a call

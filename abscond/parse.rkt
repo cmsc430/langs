@@ -6,5 +6,5 @@
 (define (parse s)
   (match s
     [(? exact-integer?) (Lit s)]
-    [_ (error "Parse error")]))
+    [_ (error "parse error" s)]))
 
