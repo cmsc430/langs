@@ -9,6 +9,5 @@
 ;; emit asm code on stdout
 (define (main)
   (read-line) ; ignore #lang racket line
-  (asm-display (compile
-                        (parse-closed (read)))))
+  (asm-display (compile (parse-closed (read)))))
 

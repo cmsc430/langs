@@ -1,6 +1,5 @@
 #lang racket
-(provide parse parse-closed parse-e parse-define
-         parse-pattern)
+(provide parse parse-closed parse-e parse-define parse-pattern)
 (require "ast.rkt")
 
 ;; [Listof S-Expr] -> Prog

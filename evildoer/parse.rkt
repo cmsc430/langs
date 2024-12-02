@@ -23,7 +23,6 @@
           [(list s1 s2)
            (Begin (parse s1) (parse s2))]
           [_ (error "begin: bad syntax" s)])]
-
        ['if
         (match sr
           [(list s1 s2 s3)

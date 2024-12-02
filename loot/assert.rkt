@@ -23,13 +23,8 @@
 
 ;; Register -> Asm
 
-
 (define assert-char
   (assert-type mask-char type-char))
-
-
-
-
 (define assert-box
   (assert-type ptr-mask type-box))
 (define assert-cons
