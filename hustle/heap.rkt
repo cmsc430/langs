@@ -1,15 +1,18 @@
 #lang racket
-(provide alloc-box alloc-cons heap-ref heap-set)
+(provide alloc-box alloc-cons heap-ref heap-set box-ptr cons-ptr)
+
+(struct box-ptr (i))
+(struct cons-ptr (i))
 
 ;; Value* Heap -> Answer*
 (define (alloc-box v h)
   (cons (cons v h)
-        (list 'box (length h))))
+        (box-ptr (length h))))
 
 ;; Value* Value* Heap -> Answer*
 (define (alloc-cons v1 v2 h)
   (cons (cons v2 (cons v1 h))
-        (list 'cons (length h))))
+        (cons-ptr (length h))))
 
 ;; Heap Address -> Value*
 (define (heap-ref h a)

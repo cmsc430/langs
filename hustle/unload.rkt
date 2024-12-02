@@ -13,12 +13,12 @@
   (match v
     [(? integer?)    v]
     [(? boolean?)    v]
-    [(? char?)       v]    
+    [(? char?)       v]
     [(? eof-object?) v]
-    [(? void?)       v]    
-    ['()             '()]        
-    [(list 'box a)
+    [(? void?)       v]
+    ['()             '()]
+    [(box-ptr a)
      (box (unload-value (heap-ref h a) h))]
-    [(list 'cons a)
+    [(cons-ptr a)
      (cons (unload-value (heap-ref h a) h)
            (unload-value (heap-ref h (add1 a)) h))]))

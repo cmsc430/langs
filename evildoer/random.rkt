@@ -1,5 +1,5 @@
 #lang racket
-(provide random-expr random-well-defined-expr)
+(provide random-expr random-well-defined-expr random-input)
 (require "parse.rkt")
 
 ;; Randomly generate an expression
@@ -9,6 +9,9 @@
 
 (define (random-well-defined-expr)
   (parse (contract-random-generate expr-good/c)))
+
+(define (random-input)
+  (contract-random-generate string?))
 
 (define op0/c
   (one-of/c 'read-byte 'peek-byte 'void))

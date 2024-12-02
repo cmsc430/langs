@@ -16,14 +16,16 @@
 ;; | Eof
 ;; | Void
 ;; | '()
-;; | (list 'box  Address)
-;; | (list 'cons Address)
+;; | (box-ptr  Address)
+;; | (cons-ptr Address)
+
+;; type Address = Natural
 
 ;; type Heap = (Listof Value*)
 ;; type REnv = (Listof (List Id Value*))
 
 ;; Expr -> Answer
-(define (interp e)  
+(define (interp e)
   (unload (interp-env-heap e '() '())))
 
 ;; Expr REnv Heap -> Answer*
@@ -55,7 +57,7 @@
         (if v
             (interp-env-heap e1 r h)
             (interp-env-heap e2 r h))])]
-    [(Begin e1 e2)     
+    [(Begin e1 e2)
      (match (interp-env-heap e1 r h)
        ['err 'err]
        [(cons h _) (interp-env-heap e2 r h)])]
