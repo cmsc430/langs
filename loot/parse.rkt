@@ -17,7 +17,7 @@
 ;; Parse a (potentially open) expression
 (define (parse-e s)
   (match (parse-e/acc s '() '())
-    [(list _ _ e) e]))
+    [(list _ e) e]))
 
 ;; S-Expr -> Expr
 ;; Parse a (potentially open) definition
@@ -149,7 +149,7 @@
                [(list 'if e1 e2 e3)
                 (list ys (If e1 e2 e3))]
                [(list-rest g es)
-                (list (cons g ys) (App g es))])])])]
+                (list (cons g ys) (App (Var g) es))])])])]
       [(cons s sr)
        (match (parse-e/acc s xs ys)
          [(list ys e)
