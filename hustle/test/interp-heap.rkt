@@ -1,9 +1,11 @@
 #lang racket
-(require "test-runner.rkt"
-         "../parse.rkt"
-         "../interp-heap.rkt"
-         "../interp-io.rkt")
+(require "test-runner.rkt")
+(require "../parse.rkt")
+(require "../interp-heap.rkt")
+(require "../interp-io.rkt")
 
 (test (λ (e) (interp (parse e))))
 
+;; FIXME: this is not running a heap-based interpreter!
 (test/io (λ (s e) (interp/io (parse e) s)))
+
