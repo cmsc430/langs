@@ -211,7 +211,7 @@
       ['_          (list ys xs gs (Var '_))]
       [(? symbol?) (list ys (cons p xs) gs (Var p))]
       [(list 'quote '())
-       (list ys xs (Lit '()))]
+       (list ys xs gs (Lit '()))]
       [(list 'box s)
        (match (rec s xs ys gs)
          [(list ys xs gs p)
