@@ -34,9 +34,7 @@
     [(Lit d)  (cons h d)]
     [(Eof)    (cons h eof)]
     [(Var x)  (cons h (lookup r x))]
-    [(Prim0 'void) (cons h (void))]
-    [(Prim0 'peek-byte) (cons h (peek-byte))]
-    [(Prim0 'read-byte) (cons h (read-byte))]
+    [(Prim0 p) (interp-prim0 p h)]
     [(Prim1 p e)
      (match (interp-env-heap e r h)
        ['err 'err]

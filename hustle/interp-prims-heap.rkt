@@ -1,6 +1,13 @@
 #lang racket
-(provide interp-prim1 interp-prim2)
+(provide interp-prim0 interp-prim1 interp-prim2)
 (require "heap.rkt")
+
+;; Op0 Heap -> Answer*
+(define (interp-prim0 op h)
+  (match op
+    ['read-byte (cons h (read-byte))]
+    ['peek-byte (cons h (peek-byte))]
+    ['void      (cons h (void))]))
 
 ;; Op1 Value* Heap -> Answer*
 (define (interp-prim1 p v h)
@@ -29,9 +36,10 @@
     [(list '= (? integer? i1) (? integer? i2)) (cons h (= i1 i2))]
     [(list 'eq? v1 v2)
      (match (list v1 v2)
-       [(list (list t1 a1)  (list t2 a2)) (cons h (and (eq? t1 t2) (= a1 a2)))]
-       [_                                 (cons h (eqv? v1 v2))])]
-    [(list 'cons v1 v2)                        (alloc-cons v1 v2 h)]
+       [(list (cons-ptr a1) (cons-ptr a2)) (cons h (= a1 a2))]
+       [(list (box-ptr a1)  (box-ptr a2))  (cons h (= a1 a2))]
+       [_                                  (cons h (eqv? v1 v2))])]
+    [(list 'cons v1 v2) (alloc-cons v1 v2 h)]
     [_ 'err]))
 
 ;; Any -> Boolean
