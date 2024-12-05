@@ -3,6 +3,7 @@
 (provide interp-env)
 (require "ast.rkt")
 (require "interp-prim.rkt")
+(require "env.rkt")
 
 ;; type Value =
 ;; | Integer
@@ -53,16 +54,4 @@
      (match (interp-env e1 r)
        ['err 'err]
        [v (interp-env e2 (ext r x v))])]))
-
-;; Env Id -> Value
-(define (lookup r x)
-  (match r
-    [(cons (list y val) r)
-     (if (symbol=? x y)
-         val
-         (lookup r x))]))
-
-;; Env Id Value -> Env
-(define (ext r x v)
-  (cons (list x v) r))
 

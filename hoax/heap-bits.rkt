@@ -6,7 +6,7 @@
 
 (struct heap ([n #:mutable] bytes))
 
-;; Value* Heap -> Answer*
+;; Value* Heap -> Value*
 (define (alloc-box v h)
   (match h
     [(heap n bs)
@@ -14,7 +14,7 @@
      (set-heap-n! h (+ n 8))
      (bitwise-xor n type-box)]))
 
-;; Value* Value* Heap -> Answer*
+;; Value* Value* Heap -> Value*
 (define (alloc-cons v1 v2 h)
   (match h
     [(heap n bs)
@@ -23,6 +23,7 @@
      (set-heap-n! h (+ n 16))
      (bitwise-xor n type-cons)]))
 
+;; [Listof Value*] Heap -> Value*
 (define (alloc-vect vs h)
   (match h
     [(heap n bs)
@@ -31,6 +32,7 @@
      (set-heap-n! h (+ n (* 8 (add1 (length vs)))))
      (bitwise-xor n type-vect)]))
 
+;; [Listof CharBits] Heap -> Value*
 (define (alloc-str cs h)
   (match h
     [(heap n bs)
@@ -40,6 +42,7 @@
      (bitwise-xor n type-str)]))
 
 
+;; Heap [Listof Value*] Natural -> Void
 (define (write-values! h vs i)
   (match vs
     ['() (void)]

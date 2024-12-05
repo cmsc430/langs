@@ -5,7 +5,7 @@
 
 (struct heap ([n #:mutable] bytes))
 
-;; Value* Heap -> Answer*
+;; Value* Heap -> Value*
 (define (alloc-box v h)
   (match h
     [(heap n bs)
@@ -13,7 +13,7 @@
      (set-heap-n! h (+ n 8))
      (bitwise-xor n type-box)]))
 
-;; Value* Value* Heap -> Answer*
+;; Value* Value* Heap -> Value*
 (define (alloc-cons v1 v2 h)
   (match h
     [(heap n bs)
