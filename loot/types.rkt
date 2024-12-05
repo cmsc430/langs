@@ -28,20 +28,20 @@
         [(char-bits? b)
          (integer->char (arithmetic-shift b (- char-shift)))]
         [(box-bits? b)
-         (box (bits->value (heap-ref b)))]
+         (box (bits->value (mem-ref b)))]
         [(cons-bits? b)
-         (cons (bits->value (heap-ref (+ b 8)))
-               (bits->value (heap-ref b)))]
+         (cons (bits->value (mem-ref (+ b 8)))
+               (bits->value (mem-ref b)))]
         [(vect-bits? b)
          (if (zero? (untag b))
              (vector)
-             (build-vector (heap-ref b)
+             (build-vector (mem-ref b)
                            (lambda (j)
-                             (bits->value (heap-ref (+ b (* 8 (add1 j))))))))]
+                             (bits->value (mem-ref (+ b (* 8 (add1 j))))))))]
         [(str-bits? b)
          (if (zero? (untag b))
              (string)
-             (build-string (heap-ref b)
+             (build-string (mem-ref b)
                            (lambda (j)
                              (char-ref (+ b 8) j))))]
         [(proc-bits? b)
@@ -86,7 +86,7 @@
   (arithmetic-shift (arithmetic-shift i (- (integer-length ptr-mask)))
                     (integer-length ptr-mask)))
 
-(define (heap-ref i)
+(define (mem-ref i)
   (ptr-ref (cast (untag i) _int64 _pointer) _int64))
 
 (define (char-ref i j)

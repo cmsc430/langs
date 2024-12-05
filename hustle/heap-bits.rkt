@@ -1,25 +1,32 @@
 #lang racket
-(provide alloc-box alloc-cons heap-ref heap-set)
 (require "types.rkt")
+(provide (struct-out heap) heap-ref
+         alloc-box alloc-cons)
 
-;; Value* Heap -> Answer
+(struct heap ([n #:mutable] bytes))
+
+;; Value* Heap -> Answer*
 (define (alloc-box v h)
-  (cons (cons v h)
-        (bitwise-ior (arithmetic-shift (length h) imm-shift)
-                     type-box)))
+  (match h
+    [(heap n bs)
+     (heap-set! h n v)
+     (set-heap-n! h (+ n 8))
+     (bitwise-xor n type-box)]))
 
-;; Value* Value* Heap -> Answer
+;; Value* Value* Heap -> Answer*
 (define (alloc-cons v1 v2 h)
-  (cons (cons v2 (cons v1 h))
-        (bitwise-ior (arithmetic-shift (length h) imm-shift)
-                     type-cons)))
+  (match h
+    [(heap n bs)
+     (heap-set! h (+ n 0) v1)
+     (heap-set! h (+ n 8) v2)
+     (set-heap-n! h (+ n 16))
+     (bitwise-xor n type-cons)]))
 
 ;; Heap Address -> Value*
 (define (heap-ref h a)
-  (let ((a (arithmetic-shift a (- imm-shift))))
-    (list-ref h (- (length h) (add1 a)))))
+  (integer-bytes->integer (heap-bytes h) #t #f a (+ a 8)))
 
-;; Heap Address Value* -> Heap
-(define (heap-set h a v)
-  (let ((a (arithmetic-shift a (- imm-shift))))
-    (list-set h (- (length h) a 1) v)))
+;; Heap Address Value* -> Void
+(define (heap-set! h i v)
+  (integer->integer-bytes v 8 (negative? v) #f (heap-bytes h) i))
+

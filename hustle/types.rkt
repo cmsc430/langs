@@ -25,10 +25,10 @@
         [(char-bits? b)
          (integer->char (arithmetic-shift b (- char-shift)))]
         [(box-bits? b)
-         (box (bits->value (heap-ref b)))]
+         (box (bits->value (mem-ref b)))]
         [(cons-bits? b)
-         (cons (bits->value (heap-ref (+ b 8)))
-               (bits->value (heap-ref b)))]
+         (cons (bits->value (mem-ref (+ b 8)))
+               (bits->value (mem-ref b)))]
         [else (error "invalid bits")]))
 
 (define (value->bits v)
@@ -62,6 +62,6 @@
   (arithmetic-shift (arithmetic-shift i (- (integer-length ptr-mask)))
                     (integer-length ptr-mask)))
 
-(define (heap-ref i)
+(define (mem-ref i)
   (ptr-ref (cast (untag i) _int64 _pointer) _int64))
 

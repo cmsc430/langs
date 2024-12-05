@@ -37,6 +37,7 @@
 ;; Expr REnv Heap -> Answer*
 (define (interp-env-heap-bits e r h)
   (match e
+    [(Lit (? string? s)) (alloc-str (map value->bits (string->list s)) h)]
     [(Lit d) (value->bits d)]
     [(Eof)   (value->bits eof)]
     [(Var x) (lookup r x)]
@@ -54,6 +55,17 @@
           ['err 'err]
           [v2
            (interp-prim2 p v1 v2 h)])])]
+    [(Prim3 p e1 e2 e3)
+     (match (interp-env-heap-bits e1 r h)
+       ['err 'err]
+       [v1
+        (match (interp-env-heap-bits e2 r h)
+          ['err 'err]
+          [v2
+           (match (interp-env-heap-bits e3 r h)
+             ['err 'err]
+             [v3
+              (interp-prim3 p v1 v2 v3 h)])])])]
     [(If p e1 e2)
      (match (interp-env-heap-bits p r h)
        ['err 'err]
