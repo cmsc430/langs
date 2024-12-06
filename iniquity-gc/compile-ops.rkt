@@ -1,5 +1,5 @@
 #lang racket
-(provide (all-defined-out))
+(provide compile-op0 compile-op1 compile-op2 compile-op3 pad-stack unpad-stack allocate)
 (require "ast.rkt" "types.rkt" a86/ast)
 
 (define rax 'rax) ; return

@@ -1,5 +1,5 @@
 #lang racket
-(provide (all-defined-out))
+(provide compile-e compile-lambda-defines compile-lambda-define free-vars-to-heap)
 (require "ast.rkt"
          "types.rkt"
          "lambdas.rkt"
@@ -13,6 +13,9 @@
 (define rbx 'rbx) ; heap
 (define rsp 'rsp) ; stack
 (define rdi 'rdi) ; arg
+(define r8 'r8)
+(define r9 'r9)
+(define rsi 'rsi)
 
 ;; Expr CEnv Bool -> Asm
 (define (compile-e e c t?)
