@@ -19,5 +19,15 @@
      (define p (bitwise-xor v type-cons))
      (cons (unload-value (heap-ref h (+ p 0)) h)
            (unload-value (heap-ref h (+ p 8)) h))]
+    [(? vect-bits?)
+     (define p (bitwise-xor v type-vect))
+     (build-vector (arithmetic-shift (heap-ref h p) (- int-shift))
+                   (λ (i)
+                     (bits->value (heap-ref h (+ p (* 8 (add1 i)))))))]
+    [(? str-bits?)
+     (define p (bitwise-xor v type-str))
+     (build-string (arithmetic-shift (heap-ref h p) (- int-shift))
+                   (λ (i)
+                     (bits->value (heap-ref h (+ p (* 8 (add1 i)))))))]
     [_ (bits->value v)]))
 

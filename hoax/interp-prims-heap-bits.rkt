@@ -1,5 +1,5 @@
 #lang racket
-(provide interp-prim0 interp-prim1 interp-prim2)
+(provide interp-prim0 interp-prim1 interp-prim2 interp-prim3)
 (require "heap-bits.rkt")
 (require "types.rkt")
 
@@ -39,6 +39,16 @@
      (heap-ref h (bitwise-xor (+ i 8) type-cons))]
     [(list 'empty? v)
      (value->bits (= (value->bits '()) v))]
+    [(list 'vector? v)
+     (value->bits (vect-bits? v))]
+    [(list 'string? v)
+     (value->bits (str-bits? v))]
+    [(list 'vector-length (? vect-bits?))
+     (define p (bitwise-xor v type-vect))
+     (heap-ref h p)]
+    [(list 'string-length (? str-bits?))
+     (define p (bitwise-xor v type-str))
+     (heap-ref h p)]
     [_ 'err]))
 
 ;; Op2 Value* Value* Heap -> Answer*
@@ -50,6 +60,34 @@
     [(list '= (? int-bits? i1) (? int-bits? i2)) (value->bits (= i1 i2))]
     [(list 'eq? v1 v2) (value->bits (= v1 v2))]
     [(list 'cons v1 v2) (alloc-cons v1 v2 h)]
+    [(list 'make-vector (? int-bits? i) v)
+     (if (< i 0)
+         'err
+         (alloc-vect (make-list (arithmetic-shift i (- int-shift)) v) h))]
+    [(list 'vector-ref (? vect-bits? a) (? int-bits? i))
+     (define p (bitwise-xor a type-vect))
+     (if (<= 0 i (sub1 (heap-ref h p)))
+         (heap-ref h (+ p 8 (arithmetic-shift i (- 3 int-shift))))
+         'err)]
+    [(list 'make-string (? int-bits? i) (? char-bits? c))
+     (if (< i 0)
+         'err
+         (alloc-str (make-list (arithmetic-shift i (- int-shift)) c) h))]
+    [(list 'string-ref (? str-bits? a) (? int-bits? i))
+     (define p (bitwise-xor a type-str))
+     (if (<= 0 i (sub1 (heap-ref h p)))
+         (heap-ref h (+ p 8 (arithmetic-shift i (- 3 int-shift))))
+         'err)]
+    [_ 'err]))
+
+;; Op3 Value* Value* Value* Heap -> Answer*
+(define (interp-prim3 p v1 v2 v3 h)
+  (match (list p v1 v2 v3)
+    [(list 'vector-set! (? vect-bits?) (? int-bits?) _)
+     (define p (bitwise-xor v1 type-vect))
+     (if (<= 0 v2 (sub1 (heap-ref h p)))
+         (heap-set! h (+ p 8 (arithmetic-shift v2 (- 3 int-shift))) v3)
+         'err)]
     [_ 'err]))
 
 ;; Int64 -> Boolean

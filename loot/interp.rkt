@@ -4,6 +4,7 @@
 (provide interp-match-pat)
 (require "ast.rkt")
 (require "interp-prim.rkt")
+(require "env.rkt")
 
 ;; type Value =
 ;; | Integer
@@ -149,17 +150,4 @@
     [((cons x xs) (cons y ys))
      (cons (list x y)
            (zip xs ys))]))
-
-;; Env Id -> Answer
-(define (lookup env x)
-  (match env
-    ['() 'err]
-    [(cons (list y i) env)
-     (match (symbol=? x y)
-       [#t i]
-       [#f (lookup env x)])]))
-
-;; Env Id Value -> Env
-(define (ext r x v)
-  (cons (list x v) r))
 
