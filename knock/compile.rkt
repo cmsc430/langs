@@ -1,5 +1,10 @@
 #lang racket
-(provide (all-defined-out))
+(provide compile
+         compile-e
+         compile-es
+         compile-define
+         compile-match)
+
 (require "ast.rkt")
 (require "compile-ops.rkt")
 (require "types.rkt")
