@@ -7,6 +7,9 @@
          "compile-expr.rkt"
          a86/ast)
 
+(define rax 'rax)
+(define rbx 'rbx)
+
 ;; [Listof Defn] -> [Listof Id]
 (define (define-ids ds)
   (match ds
