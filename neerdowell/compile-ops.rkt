@@ -1,5 +1,5 @@
 #lang racket
-(provide (all-defined-out))
+(provide compile-op pad-stack unpad-stack assert-proc compile-make-struct)
 (require "ast.rkt" "types.rkt" "utils.rkt" a86/ast)
 
 (define rax 'rax) ; return

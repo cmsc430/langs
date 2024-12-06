@@ -1,5 +1,5 @@
 #lang racket
-(provide (all-defined-out))
+(provide compile compile-e)
 (require "ast.rkt" "types.rkt" "compile-ops.rkt" a86/ast)
 
 ;; Registers used
