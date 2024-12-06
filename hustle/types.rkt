@@ -39,12 +39,10 @@
         [(char-bits? b)
          (integer->char (arithmetic-shift b (- char-shift)))]
         [(box-bits? b)
-         (define p (untag b))
-         (box (bits->value (mem-ref p)))]
+         (box (bits->value (mem-ref (box-pointer b))))]
         [(cons-bits? b)
-         (define p (untag b))
-         (cons (bits->value (mem-ref (+ p 8)))
-               (bits->value (mem-ref p)))]
+         (cons (bits->value (mem-ref (cons-car-pointer b)))
+               (bits->value (mem-ref (cons-cdr-pointer b))))]
         [else (error "invalid bits")]))
 
 (define (value->bits v)
@@ -71,6 +69,18 @@
 (define (box-bits? v)
   (or (= type-mutable-box (bitwise-and v #xFF))
       (= type-immutable-box (bitwise-and v #xFF))))
+
+;; BoxValue* -> Address
+(define (box-pointer v)
+  (untag v))
+
+;; ConsValue* -> Address
+(define (cons-car-pointer v)
+  (+ (untag v) 8))
+
+;; ConsValue* -> Address
+(define (cons-cdr-pointer v)
+  (untag v))
 
 (define (untag i)
   (arithmetic-shift i -16))

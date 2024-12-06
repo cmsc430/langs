@@ -32,11 +32,11 @@
             (value->bits (void)))]
     [(list 'box v) (alloc-box v h)]
     [(list 'unbox (? box-bits? i))
-     (heap-ref h (bitwise-xor i type-box))]
+     (heap-ref h (box-pointer i))]
     [(list 'car (? cons-bits? i))
-     (heap-ref h (bitwise-xor i type-cons))]
+     (heap-ref h (cons-car-pointer i))]
     [(list 'cdr (? cons-bits? i))
-     (heap-ref h (bitwise-xor (+ i 8) type-cons))]
+     (heap-ref h (cons-cdr-pointer i))]
     [(list 'empty? v)
      (value->bits (= (value->bits '()) v))]
     [_ 'err]))

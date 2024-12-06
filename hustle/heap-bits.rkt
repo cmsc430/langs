@@ -11,16 +11,16 @@
     [(heap n bs)
      (heap-set! h n v)
      (set-heap-n! h (+ n 8))
-     (bitwise-xor n type-box)]))
+     (bitwise-xor (arithmetic-shift n 16) type-mutable-box)]))
 
 ;; Value* Value* Heap -> Value*
 (define (alloc-cons v1 v2 h)
   (match h
     [(heap n bs)
-     (heap-set! h (+ n 0) v1)
-     (heap-set! h (+ n 8) v2)
+     (heap-set! h (+ n 0) v2)
+     (heap-set! h (+ n 8) v1)
      (set-heap-n! h (+ n 16))
-     (bitwise-xor n type-cons)]))
+     (bitwise-xor (arithmetic-shift n 16) type-cons)]))
 
 ;; Heap Address -> Value*
 (define (heap-ref h a)

@@ -13,11 +13,9 @@
 (define (unload-value v h)
   (match v
     [(? box-bits?)
-     (define p (bitwise-xor v type-box))
-     (box (unload-value (heap-ref h p) h))]
+     (box (unload-value (heap-ref h (box-pointer v)) h))]
     [(? cons-bits?)
-     (define p (bitwise-xor v type-cons))
-     (cons (unload-value (heap-ref h (+ p 0)) h)
-           (unload-value (heap-ref h (+ p 8)) h))]
+     (cons (unload-value (heap-ref h (cons-car-pointer v)) h)
+           (unload-value (heap-ref h (cons-cdr-pointer v)) h))]
     [_ (bits->value v)]))
 
