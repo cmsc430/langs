@@ -1,11 +1,13 @@
 #lang racket
-(provide (all-defined-out))
+(provide compile-define compile-defines-values define-ids compile-defines)
 (require "ast.rkt"
          "types.rkt"
          "fv.rkt"
          "utils.rkt"
          "compile-expr.rkt"
          a86/ast)
+
+(define rax 'rax)
 
 ;; [Listof Defn] -> [Listof Id]
 (define (define-ids ds)
