@@ -1,5 +1,13 @@
 #lang racket
-(provide (all-defined-out))
+(provide compile
+         compile-e
+         compile-es
+         compile-define
+         compile-match
+         compile-lambda-define
+         copy-env-to-stack
+         free-vars-to-heap)
+
 (require "ast.rkt")
 (require "compile-ops.rkt")
 (require "types.rkt")

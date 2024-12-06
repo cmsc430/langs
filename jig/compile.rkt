@@ -1,5 +1,9 @@
 #lang racket
-(provide (all-defined-out))
+(provide compile
+         compile-e
+         compile-es
+         compile-define)
+
 (require "ast.rkt")
 (require "compile-ops.rkt")
 (require "types.rkt")
