@@ -88,8 +88,8 @@
 (define (op1? x)
   (memq x '(add1 sub1 zero? char? integer->char char->integer
                  write-byte eof-object?
-                 box unbox empty? cons? box? car cdr)))
+                 box box-immutable unbox empty? cons? box? car cdr)))
 
 (define (op2? x)
-  (memq x '(+ - < = eq? cons)))
+  (memq x '(+ - < = eq? cons set-box!)))
 

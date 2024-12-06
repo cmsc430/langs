@@ -6,6 +6,7 @@
 (require a86/ast)
 
 (define rax 'rax)
+(define ax  'ax)  ; pointer type tag
 (define rbx 'rbx) ; heap
 (define rdi 'rdi) ; arg
 (define r8  'r8)  ; scratch in op2
@@ -57,26 +58,47 @@
           (Call 'write_byte)
           unpad-stack)]
     ['box
-     (seq (Mov (Offset rbx 0) rax) ; memory write
-          (Mov rax rbx)            ; put box in rax
-          (Xor rax type-box)       ; tag as a box
+     (seq (Mov (Offset rbx 0) rax)    ; memory write
+          (Mov rax rbx)               ; put box in rax
+          (Shl rax 16)
+          (Mov ax type-mutable-box)  ; tag as a mutable box
+          (Add rbx 8))]
+    ['box-immutable
+     (seq (Mov (Offset rbx 0) rax)
+          (Mov rax rbx)
+          (Shl rax 16)
+          (Mov ax type-immutable-box)
           (Add rbx 8))]
     ['unbox
-     (seq (assert-box rax)
-          (Xor rax type-box)
+     (seq (And ax #b11111101) ; delete the mut bit
+          (Cmp ax type-box)
+          (Jnz 'err)
+          (Shr rax 16)
           (Mov rax (Offset rax 0)))]
     ['car
-     (seq (assert-cons rax)
-          (Xor rax type-cons)
+     (seq (Cmp ax type-cons)
+          (Jnz 'err)
+          (Shr rax 16)
           (Mov rax (Offset rax 8)))]
     ['cdr
-     (seq (assert-cons rax)
-          (Xor rax type-cons)
+     (seq (Cmp ax type-cons)
+          (Jnz 'err)
+          (Shr rax 16)
           (Mov rax (Offset rax 0)))]
-
     ['empty? (seq (Cmp rax (value->bits '())) if-equal)]
-    ['cons? (type-pred ptr-mask type-cons)]
-    ['box?  (type-pred ptr-mask type-box)]))
+    ['cons?
+     (seq (Mov r8 (value->bits #f))          
+          (Cmp ax type-cons)
+          (Mov rax (value->bits #t))
+          (Cmovne rax r8))]          
+    ['box?
+     (seq (Mov r8 (value->bits #f))          
+          (Cmp ax type-immutable-box)
+          (Mov r9 (value->bits #t))
+          (Cmp ax type-mutable-box)
+          (Mov r9 (value->bits #t))
+          (Mov rax r9)
+          (Cmovne rax r8))]))
 
 
 ;; Op2 -> Asm
@@ -110,12 +132,20 @@
           (Pop rax)
           (Mov (Offset rbx 8) rax)
           (Mov rax rbx)
-          (Xor rax type-cons)
+          (Shl rax 16)
+          (Mov ax type-cons)
           (Add rbx 16))]
     ['eq?
      (seq (Pop r8)
           (Cmp rax r8)
-          if-equal)]))
+          if-equal)]
+    ['set-box!
+     (seq (Pop r8)
+          (Cmp 'r8w type-mutable-box)
+          (Jnz 'err)
+          (Sar r8 16)
+          (Mov (Offset r8 0) rax)
+          (Mov rax (value->bits (void))))]))
 
 (define (type-pred mask type)
   (seq (And rax mask)

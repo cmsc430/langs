@@ -5,6 +5,7 @@
 (require "types.rkt")
 
 (define r9 'r9)
+(define r8 'r8)
 
 (define (assert-type mask type)
   (λ (arg)
@@ -23,10 +24,11 @@
 
 (define assert-char
   (assert-type mask-char type-char))
+
 (define assert-box
-  (assert-type ptr-mask type-box))
+  (assert-type #xFF type-box))
 (define assert-cons
-  (assert-type ptr-mask type-cons))
+  (assert-type #xFF type-cons))
 
 ;; Register -> Asm
 (define (assert-codepoint r)

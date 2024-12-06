@@ -4,7 +4,8 @@
 type_t val_typeof(val_t x)
 {
   switch (x & ptr_type_mask) {
-  case box_type_tag:
+  case box_immutable_type_tag:
+  case box_mutable_type_tag:
     return T_BOX;
   case cons_type_tag:
     return T_CONS;
@@ -73,18 +74,18 @@ val_t val_wrap_void(void)
 
 val_box_t* val_unwrap_box(val_t x)
 {
-  return (val_box_t *)(x ^ box_type_tag);
+  return (val_box_t *)(x >> ptr_shift);
 }
 val_t val_wrap_box(val_box_t* b)
 {
-  return ((val_t)b) | box_type_tag;
+  return ((val_t)b << ptr_shift) | box_mutable_type_tag;
 }
 
 val_cons_t* val_unwrap_cons(val_t x)
 {
-  return (val_cons_t *)(x ^ cons_type_tag);
+  return (val_cons_t *)(x >> ptr_shift);
 }
 val_t val_wrap_cons(val_cons_t *c)
 {
-  return ((val_t)c) | cons_type_tag;
+  return ((val_t)c << ptr_shift) | cons_type_tag;
 }
