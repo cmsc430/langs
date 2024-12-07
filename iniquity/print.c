@@ -72,13 +72,11 @@ void print_vect(val_vect_t *v)
 {
   uint64_t i;
 
-  if (!v) { printf("#()"); return; }
-
   printf("#(");
-  for (i = 0; i < v->len; ++i) {
+  for (i = 0; i < val_unwrap_int(v->len); ++i) {
     print_result_interior(v->elems[i]);
 
-    if (i < v->len - 1)
+    if (i < val_unwrap_int(v->len) - 1)
       putchar(' ');
   }
   printf(")");
@@ -105,10 +103,9 @@ void print_cons(val_cons_t *cons)
 
 void print_str(val_str_t* s)
 {
-  if (!s) return;
-  uint64_t i;
-  for (i = 0; i < s->len; ++i)
-    print_str_char(s->codepoints[i]);
+  int64_t i;
+  for (i = 0; i < val_unwrap_int(s->len); ++i)
+    print_str_char(val_unwrap_char(s->chars[i]));
 }
 
 void print_str_char_u(val_char_t c)
