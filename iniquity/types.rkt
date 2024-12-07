@@ -11,6 +11,7 @@
 ;; Mutable and immutable must differ only in the lsb of the tag
 
 (define zero-mut #xFFFD) ; use to zero out mutability bit
+(define ptr-type-mask #xFFFF)
 
 (define type-box            (ptr-type-enum #b000))
 (define type-mutable-box    (ptr-type-enum #b001))
@@ -82,19 +83,16 @@
   (zero? (bitwise-and v imm-mask)))
 
 (define (cons-bits? v)
-  (= type-cons (bitwise-and v #xFFFF)))
+  (= type-cons (bitwise-and v ptr-type-mask)))
 
 (define (box-bits? v)
-  (or (= type-mutable-box (bitwise-and v #xFFFF))
-      (= type-immutable-box (bitwise-and v #xFFFF))))
+  (= type-box (bitwise-and v ptr-type-mask zero-mut)))
 
 (define (vect-bits? v)
-  (or (= type-mutable-vector (bitwise-and v #xFFFF))
-      (= type-immutable-vector (bitwise-and v #xFFFF))))
+  (= type-vector (bitwise-and v ptr-type-mask zero-mut)))
 
 (define (str-bits? v)
-   (or (= type-mutable-string (bitwise-and v #xFFFF))
-       (= type-immutable-string (bitwise-and v #xFFFF))))
+   (= type-string (bitwise-and v ptr-type-mask zero-mut)))
 
 ;; BoxValue* -> Address
 (define (box-pointer v)

@@ -1,8 +1,56 @@
 #lang racket
 (provide assert-integer assert-char assert-byte assert-codepoint
+         cons->address box->address address->type
+         mutable-box->address
+         vector->address string->address
+         mutable-vector->address mutable-string->address
          assert-natural)
 (require a86/ast)
 (require "types.rkt")
+
+(define r9 'r9)
+
+(define (cons->address r)
+  (seq (Cmp (reg-16-bit r) type-cons)
+       (Jne 'err)
+       (Sar r 16)))
+
+(define (box->address r)
+  (seq (And (reg-16-bit r) zero-mut)
+       (Cmp (reg-16-bit r) type-box)
+       (Jne 'err)
+       (Sar r 16)))
+
+(define (mutable-box->address r)
+  (seq (Cmp (reg-16-bit r) type-mutable-box)
+       (Jne 'err)
+       (Sar r 16)))
+
+(define (vector->address r)
+  (seq (And (reg-16-bit r) zero-mut)
+       (Cmp (reg-16-bit r) type-vector)
+       (Jne 'err)
+       (Sar r 16)))
+
+(define (mutable-vector->address r)
+  (seq (Cmp (reg-16-bit r) type-mutable-vector)
+       (Jne 'err)
+       (Sar r 16)))
+
+(define (mutable-string->address r)
+  (seq (Cmp (reg-16-bit r) type-mutable-string)
+       (Jne 'err)
+       (Sar r 16)))
+
+(define (string->address r)
+  (seq (And (reg-16-bit r) zero-mut)
+       (Cmp (reg-16-bit r) type-string)
+       (Jne 'err)
+       (Sar r 16)))
+
+(define (address->type r t)
+  (seq (Shl r 16)
+       (Mov (reg-16-bit r) t)))
 
 (define (assert-type mask type)
   (λ (arg)

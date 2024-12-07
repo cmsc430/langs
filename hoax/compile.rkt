@@ -5,6 +5,7 @@
 (require "ast.rkt")
 (require "compile-ops.rkt")
 (require "types.rkt")
+(require "assert.rkt")
 (require a86/ast)
 
 (define rax 'rax)
@@ -71,15 +72,13 @@
   (let ((len (string-length s)))
     (if (zero? len)
         (seq (Lea rax 'the_empty_sequence)
-             (Shl rax 16)
-             (Mov ax type-immutable-string))
+             (address->type rax type-immutable-string))
         (seq (Mov rax (value->bits len))
              (Mov (Offset rbx 0) rax)
              (compile-string-chars (string->list s) 8)
              (Mov rax rbx)
-             (Shl rax 16)
-             (Mov ax type-immutable-string)
-             (Add rbx (+ 8 (add1 len)))))))
+             (address->type rax type-immutable-string)
+             (Add rbx (* 8 (add1 len)))))))
 
 ;; [Listof Char] Integer -> Asm
 (define (compile-string-chars cs i)

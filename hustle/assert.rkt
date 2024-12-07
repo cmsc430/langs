@@ -1,7 +1,31 @@
 #lang racket
-(provide assert-integer assert-char assert-byte assert-codepoint)
+(provide assert-integer assert-char assert-byte assert-codepoint
+         cons->address box->address address->type
+         mutable-box->address)
 (require a86/ast)
 (require "types.rkt")
+
+(define r9 'r9)
+
+(define (cons->address r)
+  (seq (Cmp (reg-16-bit r) type-cons)
+       (Jne 'err)
+       (Sar r 16)))
+
+(define (box->address r)
+  (seq (And (reg-16-bit r) zero-mut)
+       (Cmp (reg-16-bit r) type-box)
+       (Jne 'err)
+       (Sar r 16)))
+
+(define (mutable-box->address r)
+  (seq (Cmp (reg-16-bit r) type-mutable-box)
+       (Jne 'err)
+       (Sar r 16)))
+
+(define (address->type r t)
+  (seq (Shl r 16)
+       (Mov (reg-16-bit r) t)))
 
 (define (assert-type mask type)
   (λ (arg)
