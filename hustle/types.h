@@ -26,11 +26,11 @@
 #define imm_shift        1
 #define ptr_type_mask    ((16 << imm_shift) - 1)
 
-#define ptr_type_tag           1
-#define box_immutable_type_tag ((0 << imm_shift) | ptr_type_tag)
-#define box_mutable_type_tag   ((1 << imm_shift) | ptr_type_tag)
-#define cons_type_tag          ((2 << imm_shift) | ptr_type_tag)
-#define ptr_shift              16
+#define ptr_type_tag            1
+#define box_immutable_type_tag  ((0 << imm_shift) | ptr_type_tag)
+#define box_mutable_type_tag    ((1 << imm_shift) | ptr_type_tag)
+#define cons_type_tag           ((2 << imm_shift) | ptr_type_tag)
+#define ptr_shift               16
 
 #define int_shift        (1 + imm_shift)
 #define int_type_mask    ((1 << int_shift) - 1)
@@ -47,5 +47,3 @@
 #define val_empty ((4 << char_shift) | nonchar_type_tag)
 
 #endif
-
-

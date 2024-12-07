@@ -1,11 +1,7 @@
 #lang racket
-(provide assert-integer assert-char assert-byte assert-codepoint
-         assert-box assert-cons)
+(provide assert-integer assert-char assert-byte assert-codepoint)
 (require a86/ast)
 (require "types.rkt")
-
-(define r9 'r9)
-(define r8 'r8)
 
 (define (assert-type mask type)
   (λ (arg)
@@ -24,11 +20,6 @@
 
 (define assert-char
   (assert-type mask-char type-char))
-
-(define assert-box
-  (assert-type #xFF type-box))
-(define assert-cons
-  (assert-type #xFF type-cons))
 
 ;; Register -> Asm
 (define (assert-codepoint r)

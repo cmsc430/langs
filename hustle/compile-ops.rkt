@@ -5,16 +5,6 @@
 (require "assert.rkt")
 (require a86/ast)
 
-(define rax 'rax)
-(define ax  'ax)  ; pointer type tag
-(define rbx 'rbx) ; heap
-(define rdi 'rdi) ; arg
-(define r8  'r8)  ; scratch in op2
-(define r9  'r9)  ; scratch
-
-(define r15 'r15) ; stack pad (non-volatile)
-(define rsp 'rsp) ; stack
-
 ;; Op0 -> Asm
 (define (compile-op0 p)
   (match p
@@ -70,7 +60,7 @@
           (Mov ax type-immutable-box)
           (Add rbx 8))]
     ['unbox
-     (seq (And ax #b11111101) ; delete the mut bit
+     (seq (And ax zero-mut) ; delete the mut bit
           (Cmp ax type-box)
           (Jnz 'err)
           (Shr rax 16)
@@ -87,12 +77,12 @@
           (Mov rax (Offset rax 0)))]
     ['empty? (seq (Cmp rax (value->bits '())) if-equal)]
     ['cons?
-     (seq (Mov r8 (value->bits #f))          
+     (seq (Mov r8 (value->bits #f))
           (Cmp ax type-cons)
           (Mov rax (value->bits #t))
-          (Cmovne rax r8))]          
+          (Cmovne rax r8))]
     ['box?
-     (seq (Mov r8 (value->bits #f))          
+     (seq (Mov r8 (value->bits #f))
           (Cmp ax type-immutable-box)
           (Mov r9 (value->bits #t))
           (Cmp ax type-mutable-box)
@@ -142,7 +132,7 @@
     ['set-box!
      (seq (Pop r8)
           (Cmp 'r8w type-mutable-box)
-          (Jnz 'err)
+          (Jne 'err)
           (Sar r8 16)
           (Mov (Offset r8 0) rax)
           (Mov rax (value->bits (void))))]))

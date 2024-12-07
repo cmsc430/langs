@@ -12,16 +12,16 @@
     [(heap n bs)
      (heap-set! h n v)
      (set-heap-n! h (+ n 8))
-     (bitwise-xor n type-box)]))
+     (bitwise-xor (arithmetic-shift n 16) type-mutable-box)]))
 
 ;; Value* Value* Heap -> Value*
 (define (alloc-cons v1 v2 h)
   (match h
     [(heap n bs)
-     (heap-set! h (+ n 0) v1)
-     (heap-set! h (+ n 8) v2)
+     (heap-set! h (+ n 0) v2)
+     (heap-set! h (+ n 8) v1)
      (set-heap-n! h (+ n 16))
-     (bitwise-xor n type-cons)]))
+     (bitwise-xor (arithmetic-shift n 16) type-cons)]))
 
 ;; [Listof Value*] Heap -> Value*
 (define (alloc-vect vs h)
@@ -30,7 +30,7 @@
      (heap-set! h n (arithmetic-shift (length vs) int-shift))
      (write-values! h vs (+ n 8))
      (set-heap-n! h (+ n (* 8 (add1 (length vs)))))
-     (bitwise-xor n type-vect)]))
+     (bitwise-xor (arithmetic-shift n 16) type-mutable-vector)]))
 
 ;; [Listof CharBits] Heap -> Value*
 (define (alloc-str cs h)
@@ -39,7 +39,7 @@
      (heap-set! h n (arithmetic-shift (length cs) int-shift))
      (write-values! h cs (+ n 8))
      (set-heap-n! h (+ n (* 8 (add1 (length cs)))))
-     (bitwise-xor n type-str)]))
+     (bitwise-xor (arithmetic-shift n 16) type-mutable-string)]))
 
 
 ;; Heap [Listof Value*] Natural -> Void

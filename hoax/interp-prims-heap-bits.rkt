@@ -32,11 +32,11 @@
             (value->bits (void)))]
     [(list 'box v) (alloc-box v h)]
     [(list 'unbox (? box-bits? i))
-     (heap-ref h (bitwise-xor i type-box))]
+     (heap-ref h (box-pointer i))]
     [(list 'car (? cons-bits? i))
-     (heap-ref h (bitwise-xor i type-cons))]
+     (heap-ref h (cons-car-pointer i))]
     [(list 'cdr (? cons-bits? i))
-     (heap-ref h (bitwise-xor (+ i 8) type-cons))]
+     (heap-ref h (cons-cdr-pointer i))]
     [(list 'empty? v)
      (value->bits (= (value->bits '()) v))]
     [(list 'vector? v)
@@ -44,11 +44,9 @@
     [(list 'string? v)
      (value->bits (str-bits? v))]
     [(list 'vector-length (? vect-bits?))
-     (define p (bitwise-xor v type-vect))
-     (heap-ref h p)]
+     (heap-ref h (vector-length-pointer v))]
     [(list 'string-length (? str-bits?))
-     (define p (bitwise-xor v type-str))
-     (heap-ref h p)]
+     (heap-ref h (string-length-pointer v))]
     [_ 'err]))
 
 ;; Op2 Value* Value* Heap -> Answer*
@@ -65,18 +63,16 @@
          'err
          (alloc-vect (make-list (arithmetic-shift i (- int-shift)) v) h))]
     [(list 'vector-ref (? vect-bits? a) (? int-bits? i))
-     (define p (bitwise-xor a type-vect))
-     (if (<= 0 i (sub1 (heap-ref h p)))
-         (heap-ref h (+ p 8 (arithmetic-shift i (- 3 int-shift))))
+     (if (<= 0 i (sub1 (heap-ref h (vector-length-pointer a))))
+         (heap-ref h (vector-ref-pointer a (arithmetic-shift i (- int-shift))))
          'err)]
     [(list 'make-string (? int-bits? i) (? char-bits? c))
      (if (< i 0)
          'err
          (alloc-str (make-list (arithmetic-shift i (- int-shift)) c) h))]
     [(list 'string-ref (? str-bits? a) (? int-bits? i))
-     (define p (bitwise-xor a type-str))
-     (if (<= 0 i (sub1 (heap-ref h p)))
-         (heap-ref h (+ p 8 (arithmetic-shift i (- 3 int-shift))))
+     (if (<= 0 i (sub1 (heap-ref h (string-length-pointer a))))
+         (heap-ref h (string-ref-pointer a (arithmetic-shift i (- int-shift))))
          'err)]
     [_ 'err]))
 
@@ -84,9 +80,8 @@
 (define (interp-prim3 p v1 v2 v3 h)
   (match (list p v1 v2 v3)
     [(list 'vector-set! (? vect-bits?) (? int-bits?) _)
-     (define p (bitwise-xor v1 type-vect))
-     (if (<= 0 v2 (sub1 (heap-ref h p)))
-         (heap-set! h (+ p 8 (arithmetic-shift v2 (- 3 int-shift))) v3)
+     (if (<= 0 v2 (sub1 (heap-ref h (vector-length-pointer v1))))
+         (heap-set! h (vector-ref-pointer v1 (arithmetic-shift v2 (- int-shift))) v3)
          'err)]
     [_ 'err]))
 
