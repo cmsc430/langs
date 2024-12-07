@@ -107,7 +107,7 @@ val_t val_wrap_vect(val_vect_t *v)
 
 val_str_t* val_unwrap_str(val_t x)
 {
-  return (val_str_t *)(x >> ptr_shift);  
+  return (val_str_t *)(x >> ptr_shift);
 }
 val_t val_wrap_str(val_str_t *v)
 {

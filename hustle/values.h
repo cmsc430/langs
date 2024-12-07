@@ -12,12 +12,12 @@ typedef enum type_t {
   T_INT,
   T_BOOL,
   T_CHAR,
-  T_EOF,  
+  T_EOF,
   T_VOID,
   T_EMPTY,
   /* pointers */
   T_BOX,
-  T_CONS, 
+  T_CONS,
 } type_t;
 
 typedef uint32_t val_char_t;

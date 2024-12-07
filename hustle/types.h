@@ -3,14 +3,14 @@
 
 /*
   Important: must agree with types.rkt!
-  
+
   Bit layout of values
 
   Values:
   - Immediates:   end in #b0
   - Pointers:     end in #b1
   Immediates:
-  - Integers:   end in  #b00  
+  - Integers:   end in  #b00
   - Characters: end in #b010
   - #t:             #b000110
   - #f:             #b001110

@@ -12,7 +12,7 @@ typedef enum type_t {
   T_INT,
   T_BOOL,
   T_CHAR,
-  T_EOF,  
+  T_EOF,
   T_VOID,
   T_EMPTY,
   /* pointers */
