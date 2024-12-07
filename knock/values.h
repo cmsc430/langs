@@ -12,7 +12,7 @@ typedef enum type_t {
   T_INT,
   T_BOOL,
   T_CHAR,
-  T_EOF,  
+  T_EOF,
   T_VOID,
   T_EMPTY,
   /* pointers */
@@ -31,12 +31,12 @@ typedef struct val_cons_t {
   val_t fst;
 } val_cons_t;
 typedef struct val_vect_t {
-  uint64_t len;
+  val_t len;
   val_t elems[];
 } val_vect_t;
 typedef struct val_str_t {
-  uint64_t len;
-  val_char_t codepoints[];
+  val_t len;
+  val_t chars[];
 } val_str_t;
 
 /* return the type of x */

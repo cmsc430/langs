@@ -8,6 +8,7 @@
 (require "ast.rkt")
 (require "compile-ops.rkt")
 (require "types.rkt")
+(require "assert.rkt")
 (require a86/ast)
 
 (define rax 'rax)
@@ -38,7 +39,10 @@
            (compile-defines ds)
            (Label 'err)
            pad-stack
-           (Call 'raise_error))]))
+           (Call 'raise_error)
+           (Data)
+           (Label 'the_empty_sequence)
+           (Dq 0))]))
 
 ;; [Listof Defn] -> Asm
 (define (compile-defines ds)
@@ -92,23 +96,23 @@
 (define (compile-string s)
   (let ((len (string-length s)))
     (if (zero? len)
-        (seq (Mov rax type-str))
-        (seq (Mov rax len)
+        (seq (Lea rax 'the_empty_sequence)
+             (address->type rax type-immutable-string))
+        (seq (Mov rax (value->bits len))
              (Mov (Offset rbx 0) rax)
              (compile-string-chars (string->list s) 8)
              (Mov rax rbx)
-             (Xor rax type-str)
-             (Add rbx
-                  (+ 8 (* 4 (if (odd? len) (add1 len) len))))))))
+             (address->type rax type-immutable-string)
+             (Add rbx (* 8 (add1 len)))))))
 
 ;; [Listof Char] Integer -> Asm
 (define (compile-string-chars cs i)
   (match cs
     ['() (seq)]
     [(cons c cs)
-     (seq (Mov rax (char->integer c))
-          (Mov (Offset rbx i) 'eax)
-          (compile-string-chars cs (+ 4 i)))]))
+     (seq (Mov rax (value->bits c))
+          (Mov (Offset rbx i) rax)
+          (compile-string-chars cs (+ 8 i)))]))
 
 ;; Op0 -> Asm
 (define (compile-prim0 p)
@@ -263,14 +267,14 @@
         (let ((ok (gensym)))
           (list
            (seq (Mov r8 rax)
-                (And r8 ptr-mask)
-                (Cmp r8 type-box)
+                (And (reg-16-bit r8) zero-mut)
+                (Cmp (reg-16-bit r8) type-box)
                 (Je ok)
                 (Add rsp (* 8 (length cm))) ; haven't pushed anything yet
                 (Jmp next)
                 (Label ok)
-                (Xor rax type-box)
-                (Mov rax (Offset rax 0))
+                (Sar r8 16)
+                (Mov rax (Offset r8 0))
                 i1)
            cm1))])]
     [(Cons p1 p2)
@@ -281,16 +285,15 @@
            (let ((ok (gensym)))
              (list
               (seq (Mov r8 rax)
-                   (And r8 ptr-mask)
-                   (Cmp r8 type-cons)
+                   (Cmp (reg-16-bit r8) type-cons)
                    (Je ok)
                    (Add rsp (* 8 (length cm))) ; haven't pushed anything yet
                    (Jmp next)
                    (Label ok)
-                   (Xor rax type-cons)
-                   (Mov r8 (Offset rax 0))
-                   (Push r8)                ; push cdr
-                   (Mov rax (Offset rax 8)) ; mov rax car
+                   (Sar r8 16)
+                   (Mov rax (Offset r8 0))
+                   (Push rax)                ; push cdr
+                   (Mov rax (Offset r8 8)) ; mov rax car
                    i1
                    (Mov rax (Offset rsp (* 8 (- (sub1 (length cm1)) (length cm)))))
                    i2)
