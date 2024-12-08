@@ -5,7 +5,8 @@
          compile-define
          compile-match
          ; for notes
-         compile-pattern)
+         compile-pattern
+         compile-match-clause)
 
 (require "ast.rkt")
 (require "compile-ops.rkt")
