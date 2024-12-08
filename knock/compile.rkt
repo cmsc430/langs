@@ -3,7 +3,9 @@
          compile-e
          compile-es
          compile-define
-         compile-match)
+         compile-match
+         ; for notes
+         compile-pattern)
 
 (require "ast.rkt")
 (require "compile-ops.rkt")
