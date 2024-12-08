@@ -2,7 +2,9 @@
 (provide compile
          compile-e
          compile-es
-         compile-define)
+         compile-define
+         ; for notes
+         rsp)
 
 (require "ast.rkt")
 (require "compile-ops.rkt")
