@@ -1,5 +1,7 @@
 #lang racket
-(provide compile compile-e)
+(provide compile compile-e
+         ; for notes
+         compile-string compile-symbol)
 (require "ast.rkt"
          "types.rkt"
          "lambdas.rkt"

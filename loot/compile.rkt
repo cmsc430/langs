@@ -5,6 +5,7 @@
          compile-define
          compile-match
          compile-lambda-define
+         compile-string ; for notes
          copy-env-to-stack
          free-vars-to-heap)
 
