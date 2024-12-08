@@ -1,5 +1,7 @@
 #lang racket
-(provide compile-e compile-lambda-defines compile-lambda-define free-vars-to-heap)
+(provide compile-e compile-lambda-defines compile-lambda-define free-vars-to-heap
+         ; for notes
+         compile-string compile-symbol)
 (require "ast.rkt"
          "types.rkt"
          "lambdas.rkt"
