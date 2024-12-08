@@ -3,9 +3,11 @@ UNAME := $(shell uname)
 ifeq ($(UNAME), Darwin)
   format=macho64
   CC=arch -x86_64 gcc
+  LD=ld -macos_version_min 14.0
 else
   format=elf64
   CC=gcc
+  LD=ld
 endif
 
 objs = \
@@ -14,15 +16,8 @@ objs = \
 	values.o \
 	io.o
 
-default: submit.zip
-
-submit.zip:
-	zip submit.zip -r * \
-		-x \*.[os] -x \*~ -x \*zip \
-		-x \*Zone.Identifier -x \*\*compiled\*\*
-
 runtime.o: $(objs)
-	ld -r $(objs) -o runtime.o
+	$(LD) -r $(objs) -o runtime.o
 
 %.run: %.o runtime.o
 	$(CC) runtime.o $< -o $@
