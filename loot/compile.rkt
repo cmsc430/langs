@@ -4,6 +4,7 @@
          compile-es
          compile-define
          compile-match
+         compile-match-clause
          compile-lambda-define
          compile-string ; for notes
          copy-env-to-stack
@@ -86,7 +87,6 @@
        (let ((env  (append (reverse fvs) (reverse xs) (list #f))))
          (seq (Label (symbol->label f))
               (Mov rax (Offset rsp (* 8 (length xs))))
-              (Xor rax type-proc)
               (copy-env-to-stack fvs 8)
               (compile-e e env #t)
               (Add rsp (* 8 (length env))) ; pop env
@@ -98,7 +98,7 @@
   (match fvs
     ['() (seq)]
     [(cons _ fvs)
-     (seq (Mov r9 (Offset rax off))
+     (seq (Mov r9 (Offset rax (- off type-proc)))
           (Push r9)
           (copy-env-to-stack fvs (+ 8 off)))]))
 
@@ -219,8 +219,7 @@
        (Add rsp (* 8 (length c)))
        (Mov rax (Offset rsp (* 8 (length es))))
        (assert-proc rax)
-       (Xor rax type-proc)
-       (Mov rax (Offset rax 0))
+       (Mov rax (Offset rax (- type-proc)))
        (Jmp rax)))
 
 ;; Integer Integer -> Asm
@@ -243,8 +242,7 @@
          (compile-es (cons e es) (cons #f c))
          (Mov rax (Offset rsp i))
          (assert-proc rax)
-         (Xor rax type-proc)
-         (Mov rax (Offset rax 0)) ; fetch the code label
+         (Mov rax (Offset rax (- type-proc))) ; fetch the code label
          (Jmp rax)
          (Label r))))
 
@@ -387,8 +385,7 @@
                 (Add rsp (* 8 (length cm))) ; haven't pushed anything yet
                 (Jmp next)
                 (Label ok)
-                (Xor rax type-box)
-                (Mov rax (Offset rax 0))
+                (Mov rax (Offset rax (- type-box)))
                 i1)
            cm1))])]
     [(Cons p1 p2)

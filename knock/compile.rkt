@@ -4,9 +4,10 @@
          compile-es
          compile-define
          compile-match
-         ; for notes
-         compile-pattern
          compile-match-clause)
+
+; for notes
+(provide compile-pattern)
 
 (require "ast.rkt")
 (require "compile-ops.rkt")
@@ -272,8 +273,7 @@
                 (Add rsp (* 8 (length cm))) ; haven't pushed anything yet
                 (Jmp next)
                 (Label ok)
-                (Xor rax type-box)
-                (Mov rax (Offset rax 0))
+                (Mov rax (Offset rax (- type-box)))
                 i1)
            cm1))])]
     [(Cons p1 p2)
