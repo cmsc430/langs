@@ -1,5 +1,6 @@
 #lang racket
 (provide (all-defined-out))
+(provide r8 rax)
 (require "stdlib.rkt"
           "ast.rkt"
          "a86/ast.rkt"
