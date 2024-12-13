@@ -63,16 +63,13 @@
           (Add rbx 8))]
     ['unbox
      (seq (assert-box rax)
-          (Xor rax type-box)
-          (Mov rax (Offset rax 0)))]
+          (Mov rax (Offset rax (- type-box))))]
     ['car
      (seq (assert-cons rax)
-          (Xor rax type-cons)
-          (Mov rax (Offset rax 8)))]
+          (Mov rax (Offset rax (- 8 type-cons))))]
     ['cdr
      (seq (assert-cons rax)
-          (Xor rax type-cons)
-          (Mov rax (Offset rax 0)))]
+          (Mov rax (Offset rax (- type-cons))))]
 
     ['empty? (seq (Cmp rax (value->bits '())) if-equal)]
     ['cons? (type-pred ptr-mask type-cons)]
