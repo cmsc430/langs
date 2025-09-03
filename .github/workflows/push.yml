@@ -7,8 +7,8 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-20.04, ubuntu-22.04]
-        racket-variant: ['BC', 'CS']
-        racket-version: ['8.6', '8.8', '8.14']
+        racket-variant: ['CS']
+        racket-version: ['8.6', '8.8', '8.14', '8.18']
     name: Test on Racket ${{ matrix.racket-variant }} ${{ matrix.racket-version }} on ${{ matrix.os }}	
     steps:
     - name: Checkout
@@ -16,7 +16,7 @@ jobs:
     - name: Install nasm
       run: sudo apt-get install nasm
     - name: Install Racket
-      uses: Bogdanp/setup-racket@v1.11
+      uses: Bogdanp/setup-racket@v1.14
       with:
         architecture: 'x64'
         distribution: 'full'
