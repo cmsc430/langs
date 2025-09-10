@@ -21,4 +21,4 @@ jobs:
         raco test -p langs
     - name: Uninstall langs package
       run: |
-        raco pkg remove langs
+        raco pkg uninstall --auto
