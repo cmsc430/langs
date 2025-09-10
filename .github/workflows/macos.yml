@@ -8,13 +8,13 @@ concurrency:
 
 jobs:
   build-and-test:
-    runs-on: ${{ matrix.os }}
+    runs-on: macos-13
     strategy:
+      fail-fast: false
       matrix:
-        os: [macos-13]
         racket-variant: ['CS']
         racket-version: ['8.18']
-    name: Test on Racket ${{ matrix.racket-variant }} ${{ matrix.racket-version }} on ${{ matrix.os }}	
+    name: Test on Racket ${{ matrix.racket-variant }} ${{ matrix.racket-version }} on ${{ runner.os }}-${{ runner.arch }}	
 
     steps:
     
@@ -49,4 +49,4 @@ jobs:
       run: raco pkg install --auto ../langs/
 
    - name: Run tests
-      run: raco test -p langs
+     run: raco test -p langs
