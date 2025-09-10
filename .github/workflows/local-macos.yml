@@ -19,3 +19,6 @@ jobs:
     - name: Run tests
       run: |
         raco test -p langs
+    - name: Uninstall langs package
+      run: |
+        raco pkg uninstall --auto
