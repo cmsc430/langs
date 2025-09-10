@@ -8,7 +8,7 @@ jobs:
       matrix:
         os: [ubuntu-22.04, ubuntu-24.04]
         racket-variant: ['CS']
-        racket-version: ['8.6', '8.8', '8.14', '8.18']
+        racket-version: ['8.6', '8.8', '8.10', '8.14', '8.18']
     name: Test on Racket ${{ matrix.racket-variant }} ${{ matrix.racket-version }} on ${{ matrix.os }}	
     steps:
     - name: Checkout

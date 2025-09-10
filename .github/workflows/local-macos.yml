@@ -1,0 +1,21 @@
+name: Build and test on macOS
+on:
+  - push
+  - workflow_dispatch
+
+jobs:
+  build-and-test:
+    runs-on: [self-hosted, macOS]
+    steps:
+    - name: Check out
+      uses: actions/checkout@v4
+    - name: Version info
+      run: |
+        nasm --version
+        gcc --version
+    - name: Install langs package
+      run: |
+        raco pkg install --auto ../langs/
+    - name: Run tests
+      run: |
+        raco test -p langs
