@@ -1,5 +1,6 @@
 name: Build and test on macOS
 on:
+  - push
   - workflow_dispatch
 
 jobs:
