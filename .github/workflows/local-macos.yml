@@ -1,7 +1,6 @@
-name: Build and test on macOS
+name: Build and test on local macOS
 on:
-  - push
-  - workflow_dispatch
+  workflow_dispatch:
 
 jobs:
   build-and-test:
