@@ -1,34 +1,52 @@
+name: Build and test macOS x86_64
 on:
   - workflow_dispatch
+
+concurrency:
+  group: mac-ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build-and-test:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macos-latest]
-        racket-variant: ['BC', 'CS']
-        racket-version: ['8.6', '8.8', '8.14']
+        os: [macos-13]
+        racket-variant: ['CS']
+        racket-version: ['8.18']
     name: Test on Racket ${{ matrix.racket-variant }} ${{ matrix.racket-version }} on ${{ matrix.os }}	
+
     steps:
+    
     - name: Checkout
       uses: actions/checkout@main
+
     - name: Install nasm
-      run: brew install nasm
+      run: HOMEBREW_NO_AUTO_UPDATE=1 brew install nasm
+
     - name: Install Racket
-      uses: Bogdanp/setup-racket@v1.11
+      uses: Bogdanp/setup-racket@v1.14
       with:
         architecture: 'x64'
         distribution: 'full'
         variant: ${{ matrix.racket-variant }}
         version: ${{ matrix.racket-version }}
+
+    - name: Cache Racket packages
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.racket
+          ~/.cache/racket
+        key: racket-${{ runner.os }}-${{ runner.arch }}-${{ matrix.racket-variant }}-${{ matrix.racket-version }}
+
     - name: Version info
       run: |
         nasm --version
         gcc --version
+
     - name: Install langs package
-      run: |
-        raco pkg install --auto ../langs/
-    - name: Run tests
-      run: |
-        raco test -p langs
+      run: raco pkg install --auto ../langs/
+
+   - name: Run tests
+      run: raco test -p langs
