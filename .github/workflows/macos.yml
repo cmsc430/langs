@@ -1,6 +1,6 @@
 name: Build and test macOS x86_64
 on:
-  workflow_dispatch
+  workflow_dispatch:
 
 concurrency:
   group: mac-ci-${{ github.ref }}
@@ -14,7 +14,7 @@ jobs:
       matrix:
         racket-variant: ['CS']
         racket-version: ['8.18']
-    name: Test on Racket ${{ matrix.racket-variant }} ${{ matrix.racket-version }} on ${{ runner.os }}-${{ runner.arch }}	
+    name: Test on Racket ${{ matrix.racket-variant }} ${{ matrix.racket-version }}
 
     steps:
     
@@ -38,7 +38,7 @@ jobs:
         path: |
           ~/.racket
           ~/.cache/racket
-        key: racket-${{ runner.os }}-${{ runner.arch }}-${{ matrix.racket-variant }}-${{ matrix.racket-version }}
+        key: racket-${{ matrix.racket-variant }}-${{ matrix.racket-version }}
 
     - name: Version info
       run: |
@@ -48,5 +48,5 @@ jobs:
     - name: Install langs package
       run: raco pkg install --auto ../langs/
 
-   - name: Run tests
-     run: raco test -p langs
+    - name: Run tests
+      run: raco test -p langs
