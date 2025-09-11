@@ -1,8 +1,8 @@
 UNAME := $(shell uname)
 
 ifeq ($(UNAME), Darwin)
-  format=macho64
-  CC=arch -x86_64 gcc --gprefix _
+  format=macho64 --gprefix _
+  CC=arch -x86_64 gcc
 else
   format=elf64
   CC=gcc
