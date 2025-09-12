@@ -12,16 +12,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          # Intel (x86_64)
-          - os: macos-13
-            arch: x64
-          # Apple Silicon (arm64)
-          - os: macos-14
-            arch: arm64
+        os: [macos-13, macos-14]
         racket-variant: ['CS']
         racket-version: ['8.18']
-
+        include:
+          - os: macos-13
+            arch: x64
+          - os: macos-14
+            arch: arm64
     runs-on: ${{ matrix.os }}
     name: Test on ${{ matrix.os }} (${{ matrix.arch }}) Racket ${{ matrix.racket-variant }} ${{ matrix.racket-version }}
 
