@@ -9,7 +9,6 @@ concurrency:
 
 jobs:
   build-and-test:
-    runs-on: macos-13
     strategy:
       fail-fast: false
       matrix:
