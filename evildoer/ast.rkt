@@ -1,5 +1,6 @@
 #lang racket
-(provide Lit Prim0 Prim1 If Eof Begin)
+(provide Lit Prim0 Prim1 If
+         Eof Begin)
 ;; type Expr = (Lit Datum)
 ;;           | (Eof)
 ;;           | (Prim0 Op0)

@@ -1,5 +1,6 @@
 #lang racket
-(provide Lit Prim0 Prim1 Prim2 Prim3 If Eof Begin
+(provide Lit Prim0 Prim1 Prim2 Prim3 If
+         Eof Begin
          Let Var Prog Defn App
          Match Box Cons Conj
          Lam)
