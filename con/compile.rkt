@@ -4,9 +4,7 @@
 
 (require "ast.rkt")
 (require "compile-ops.rkt")
-(require a86/ast)
-
-(define rax 'rax)
+(require a86/ast a86/registers)
 
 ;; Expr -> Asm
 (define (compile e)

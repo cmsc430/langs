@@ -3,18 +3,7 @@
 (require "ast.rkt")
 (require "types.rkt")
 (require "assert.rkt")
-(require a86/ast)
-
-(define rax 'rax)
-(define eax 'eax) ; 32-bit load/store
-(define rbx 'rbx) ; heap
-(define rdi 'rdi) ; arg
-(define r8  'r8)  ; scratch in op2
-(define r9  'r9)  ; scratch
-(define r10 'r10) ; scratch
-
-(define r15 'r15) ; stack pad (non-volatile)
-(define rsp 'rsp) ; stack
+(require a86/ast a86/registers)
 
 ;; Op0 -> Asm
 (define (compile-op0 p)
@@ -59,19 +48,19 @@
           (Call 'write_byte)
           unpad-stack)]
     ['box
-     (seq (Mov (Offset rbx 0) rax) ; memory write
+     (seq (Mov (Mem rbx) rax) ; memory write
           (Mov rax rbx)            ; put box in rax
           (Xor rax type-box)       ; tag as a box
           (Add rbx 8))]
     ['unbox
      (seq (assert-box rax)
-          (Mov rax (Offset rax (- type-box))))]
+          (Mov rax (Mem (- type-box) rax)))]
     ['car
      (seq (assert-cons rax)
-          (Mov rax (Offset rax (- 8 type-cons))))]
+          (Mov rax (Mem (- 8 type-cons) rax)))]
     ['cdr
      (seq (assert-cons rax)
-          (Mov rax (Offset rax (- type-cons))))]
+          (Mov rax (Mem (- type-cons) rax)))]
 
     ['empty? (seq (Cmp rax (value->bits '())) if-equal)]
     ['cons? (type-pred ptr-mask type-cons)]
@@ -84,7 +73,7 @@
        (seq (assert-vector rax)
             (Cmp rax type-vect)
             (Je zero)
-            (Mov rax (Offset rax (- type-vect)))
+            (Mov rax (Mem (- type-vect) rax))
             (Sal rax int-shift)
             (Jmp done)
             (Label zero)
@@ -96,7 +85,7 @@
        (seq (assert-string rax)
             (Cmp rax type-str)
             (Je zero)
-            (Mov rax (Offset rax (- type-str)))
+            (Mov rax (Mem (- type-str) rax))
             (Sal rax int-shift)
             (Jmp done)
             (Label zero)
@@ -131,9 +120,9 @@
           (Cmp r8 rax)
           if-equal)]
     ['cons
-     (seq (Mov (Offset rbx 0) rax)
+     (seq (Mov (Mem rbx) rax)
           (Pop rax)
-          (Mov (Offset rbx 8) rax)
+          (Mov (Mem 8 rbx) rax)
           (Mov rax rbx)
           (Xor rax type-cons)
           (Add rbx 16))]
@@ -154,11 +143,11 @@
             (Xor r9 type-vect)
 
             (Sar r8 int-shift)
-            (Mov (Offset rbx 0) r8)
+            (Mov (Mem rbx) r8)
             (Add rbx 8)
 
             (Label loop)
-            (Mov (Offset rbx 0) rax)
+            (Mov (Mem rbx) rax)
             (Add rbx 8)
             (Sub r8 1)
             (Cmp r8 0)
@@ -179,14 +168,14 @@
           (Cmp rax 0)
           (Jl 'err)
           (Xor r8 type-vect)      ; r8 = ptr
-          (Mov r9 (Offset r8 0))  ; r9 = len
+          (Mov r9 (Mem r8))       ; r9 = len
           (Sar rax int-shift)     ; rax = index
           (Sub r9 1)
           (Cmp r9 rax)
           (Jl 'err)
           (Sal rax 3)
           (Add r8 rax)
-          (Mov rax (Offset r8 8)))]
+          (Mov rax (Mem 8 r8)))]
     ['make-string
      (let ((loop (gensym))
            (done (gensym))
@@ -201,7 +190,7 @@
             (Xor r9 type-str)
 
             (Sar r8 int-shift)
-            (Mov (Offset rbx 0) r8)
+            (Mov (Mem rbx) r8)
             (Add rbx 8)
 
             (Sar rax char-shift)
@@ -211,7 +200,7 @@
             (Sal r8 1) ; len is odd
 
             (Label loop)
-            (Mov (Offset rbx 0) eax)
+            (Mov (Mem rbx) eax)
             (Add rbx 4)
             (Sub r8 1)
             (Cmp r8 0)
@@ -232,14 +221,14 @@
           (Cmp rax 0)
           (Jl 'err)
           (Xor r8 type-str)       ; r8 = ptr
-          (Mov r9 (Offset r8 0))  ; r9 = len
+          (Mov r9 (Mem r8))  ; r9 = len
           (Sar rax int-shift)     ; rax = index
           (Sub r9 1)
           (Cmp r9 rax)
           (Jl 'err)
           (Sal rax 2)
           (Add r8 rax)
-          (Mov 'eax (Offset r8 8))
+          (Mov eax (Mem 8 r8))
           (Sal rax char-shift)
           (Xor rax type-char))]))
 
@@ -256,14 +245,14 @@
           (Cmp r10 0)
           (Jl 'err)
           (Xor r8 type-vect)       ; r8 = ptr
-          (Mov r9 (Offset r8 0))   ; r9 = len
+          (Mov r9 (Mem r8))        ; r9 = len
           (Sar r10 int-shift)      ; r10 = index
           (Sub r9 1)
           (Cmp r9 r10)
           (Jl 'err)
           (Sal r10 3)
           (Add r8 r10)
-          (Mov (Offset r8 8) rax)
+          (Mov (Mem 8 r8) rax)
           (Mov rax (value->bits (void))))]))
 
 (define (type-pred mask type)

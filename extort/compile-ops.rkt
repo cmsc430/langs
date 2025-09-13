@@ -3,11 +3,7 @@
 (require "ast.rkt")
 (require "types.rkt")
 (require "assert.rkt")
-(require a86/ast)
-
-(define rax 'rax)
-(define rdi 'rdi) ; arg
-(define r9  'r9)  ; scratch
+(require a86/ast a86/registers)
 
 ;; Op0 -> Asm
 (define (compile-op0 p)

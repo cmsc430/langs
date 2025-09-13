@@ -5,13 +5,7 @@
 (require "ast.rkt")
 (require "compile-ops.rkt")
 (require "types.rkt")
-(require a86/ast)
-
-(define rax 'rax)
-(define rbx 'rbx) ; heap
-(define rsp 'rsp) ; stack
-(define rdi 'rdi) ; arg
-(define r15 'r15) ; stack pad (non-volatile)
+(require a86/ast a86/registers)
 ;; ClosedExpr -> Asm
 (define (compile e)
   (prog (Global 'entry)
@@ -59,7 +53,7 @@
 ;; Id CEnv -> Asm
 (define (compile-variable x c)
   (let ((i (lookup x c)))
-    (seq (Mov rax (Offset rsp i)))))
+    (seq (Mov rax (Mem i rsp)))))
 
 ;; Op0 -> Asm
 (define (compile-prim0 p)

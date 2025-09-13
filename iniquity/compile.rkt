@@ -7,13 +7,7 @@
 (require "ast.rkt")
 (require "compile-ops.rkt")
 (require "types.rkt")
-(require a86/ast)
-
-(define rax 'rax)
-(define rbx 'rbx) ; heap
-(define rsp 'rsp) ; stack
-(define rdi 'rdi) ; arg
-(define r15 'r15) ; stack pad (non-volatile)
+(require a86/ast a86/registers)
 
 ;; Prog -> Asm
 (define (compile p)
@@ -83,7 +77,7 @@
 ;; Id CEnv -> Asm
 (define (compile-variable x c)
   (let ((i (lookup x c)))
-    (seq (Mov rax (Offset rsp i)))))
+    (seq (Mov rax (Mem i rsp)))))
 
 ;; String -> Asm
 (define (compile-string s)
@@ -91,7 +85,7 @@
     (if (zero? len)
         (seq (Mov rax type-str))
         (seq (Mov rax len)
-             (Mov (Offset rbx 0) rax)
+             (Mov (Mem rbx) rax)
              (compile-string-chars (string->list s) 8)
              (Mov rax rbx)
              (Xor rax type-str)
@@ -104,7 +98,7 @@
     ['() (seq)]
     [(cons c cs)
      (seq (Mov rax (char->integer c))
-          (Mov (Offset rbx i) 'eax)
+          (Mov (Mem i rbx) eax)
           (compile-string-chars cs (+ 4 i)))]))
 
 ;; Op0 -> Asm

@@ -14,15 +14,7 @@
 (require "types.rkt")
 (require "lambdas.rkt")
 (require "fv.rkt")
-(require a86/ast)
-
-(define rax 'rax)
-(define rbx 'rbx) ; heap
-(define rsp 'rsp) ; stack
-(define rdi 'rdi) ; arg
-(define r8  'r8)  ; scratch
-(define r9  'r9)  ; scratch
-(define r15 'r15) ; stack pad (non-volatile)
+(require a86/ast a86/registers)
 
 ;; Prog -> Asm
 (define (compile p)
@@ -85,7 +77,7 @@
       [(Lam f xs e)
        (let ((env  (append (reverse fvs) (reverse xs) (list #f))))
          (seq (Label (symbol->label f))
-              (Mov rax (Offset rsp (* 8 (length xs))))
+              (Mov rax (Mem (* 8 (length xs)) rsp))
               (copy-env-to-stack fvs 8)
               (compile-e e env #t)
               (Add rsp (* 8 (length env))) ; pop env
@@ -97,7 +89,7 @@
   (match fvs
     ['() (seq)]
     [(cons _ fvs)
-     (seq (Mov r9 (Offset rax (- off type-proc)))
+     (seq (Mov r9 (Mem (- off type-proc) rax))
           (Push r9)
           (copy-env-to-stack fvs (+ 8 off)))]))
 
@@ -132,7 +124,7 @@
 ;; Id CEnv -> Asm
 (define (compile-variable x c)
   (let ((i (lookup x c)))
-    (seq (Mov rax (Offset rsp i)))))
+    (seq (Mov rax (Mem i rsp)))))
 
 ;; String -> Asm
 (define (compile-string s)
@@ -140,7 +132,7 @@
     (if (zero? len)
         (seq (Mov rax type-str))
         (seq (Mov rax len)
-             (Mov (Offset rbx 0) rax)
+             (Mov (Mem rbx) rax)
              (compile-string-chars (string->list s) 8)
              (Mov rax rbx)
              (Xor rax type-str)
@@ -153,7 +145,7 @@
     ['() (seq)]
     [(cons c cs)
      (seq (Mov rax (char->integer c))
-          (Mov (Offset rbx i) 'eax)
+          (Mov (Mem i rbx) eax)
           (compile-string-chars cs (+ 4 i)))]))
 
 ;; Op0 -> Asm
@@ -216,9 +208,9 @@
   (seq (compile-es (cons e es) c)
        (move-args (add1 (length es)) (length c))
        (Add rsp (* 8 (length c)))
-       (Mov rax (Offset rsp (* 8 (length es))))
+       (Mov rax (Mem (* 8 (length es)) rsp))
        (assert-proc rax)
-       (Mov rax (Offset rax (- type-proc)))
+       (Mov rax (Mem (- type-proc) rax))
        (Jmp rax)))
 
 ;; Integer Integer -> Asm
@@ -226,8 +218,8 @@
   (cond [(zero? off) (seq)]
         [(zero? i)   (seq)]
         [else
-         (seq (Mov r8 (Offset rsp (* 8 (sub1 i))))
-              (Mov (Offset rsp (* 8 (+ off (sub1 i)))) r8)
+         (seq (Mov r8 (Mem (* 8 (sub1 i)) rsp))
+              (Mov (Mem (* 8 (+ off (sub1 i))) rsp) r8)
               (move-args (sub1 i) off))]))
 
 ;; Expr [Listof Expr] CEnv -> Asm
@@ -239,9 +231,9 @@
     (seq (Lea rax r)
          (Push rax)
          (compile-es (cons e es) (cons #f c))
-         (Mov rax (Offset rsp i))
+         (Mov rax (Mem i rsp))
          (assert-proc rax)
-         (Mov rax (Offset rax (- type-proc))) ; fetch the code label
+         (Mov rax (Mem (- type-proc) rax)) ; fetch the code label
          (Jmp rax)
          (Label r))))
 
@@ -260,7 +252,7 @@
     [(cons (Defn f xs e) ds)
      (let ((fvs (fv (Lam f xs e))))
        (seq (Lea rax (symbol->label f))
-            (Mov (Offset rbx off) rax)
+            (Mov (Mem off rbx) rax)
             (Mov rax rbx)
             (Add rax off)
             (Xor rax type-proc)
@@ -289,7 +281,7 @@
 (define (compile-lam f xs e c)
   (let ((fvs (fv (Lam f xs e))))
     (seq (Lea rax (symbol->label f))
-         (Mov (Offset rbx 0) rax)
+         (Mov (Mem rbx) rax)
          (free-vars-to-heap fvs c 8)
          (Mov rax rbx) ; return value
          (Xor rax type-proc)
@@ -301,8 +293,8 @@
   (match fvs
     ['() (seq)]
     [(cons x fvs)
-     (seq (Mov r8 (Offset rsp (lookup x c)))
-          (Mov (Offset rbx off) r8)
+     (seq (Mov r8 (Mem (lookup x c) rsp))
+          (Mov (Mem off rbx) r8)
           (free-vars-to-heap fvs c (+ off 8)))]))
 
 ;; [Listof Expr] CEnv -> Asm
@@ -337,7 +329,7 @@
   (let ((next (gensym)))
     (match (compile-pattern p '() next)
       [(list i cm)
-       (seq (Mov rax (Offset rsp 0)) ; restore value being matched
+       (seq (Mov rax (Mem rsp)) ; restore value being matched
             i
             (compile-e e (append cm c) t?)
             (Add rsp (* 8 (length cm)))
@@ -369,7 +361,7 @@
            (list
             (seq (Push rax)
                  i1
-                 (Mov rax (Offset rsp (* 8 (- (sub1 (length cm1)) (length cm)))))
+                 (Mov rax (Mem (* 8 (- (sub1 (length cm1)) (length cm))) rsp))
                  i2)
             cm2)])])]
     [(Box p)
@@ -384,7 +376,7 @@
                 (Add rsp (* 8 (length cm))) ; haven't pushed anything yet
                 (Jmp next)
                 (Label ok)
-                (Mov rax (Offset rax (- type-box)))
+                (Mov rax (Mem (- type-box) rax))
                 i1)
            cm1))])]
     [(Cons p1 p2)
@@ -402,11 +394,11 @@
                    (Jmp next)
                    (Label ok)
                    (Xor rax type-cons)
-                   (Mov r8 (Offset rax 0))
+                   (Mov r8 (Mem rax))
                    (Push r8)                ; push cdr
-                   (Mov rax (Offset rax 8)) ; mov rax car
+                   (Mov rax (Mem 8 rax))    ; mov rax car
                    i1
-                   (Mov rax (Offset rsp (* 8 (- (sub1 (length cm1)) (length cm)))))
+                   (Mov rax (Mem (* 8 (- (sub1 (length cm1)) (length cm))) rsp))
                    i2)
               cm2))])])]))
 

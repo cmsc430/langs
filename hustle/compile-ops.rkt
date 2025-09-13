@@ -3,16 +3,7 @@
 (require "ast.rkt")
 (require "types.rkt")
 (require "assert.rkt")
-(require a86/ast)
-
-(define rax 'rax)
-(define rbx 'rbx) ; heap
-(define rdi 'rdi) ; arg
-(define r8  'r8)  ; scratch in op2
-(define r9  'r9)  ; scratch
-
-(define r15 'r15) ; stack pad (non-volatile)
-(define rsp 'rsp) ; stack
+(require a86/ast a86/registers)
 
 ;; Op0 -> Asm
 (define (compile-op0 p)
@@ -57,19 +48,19 @@
           (Call 'write_byte)
           unpad-stack)]
     ['box
-     (seq (Mov (Offset rbx 0) rax) ; memory write
+     (seq (Mov (Mem rbx) rax) ; memory write
           (Mov rax rbx)            ; put box in rax
           (Xor rax type-box)       ; tag as a box
           (Add rbx 8))]
     ['unbox
      (seq (assert-box rax)
-          (Mov rax (Offset rax (- type-box))))]
+          (Mov rax (Mem (- type-box) rax)))]
     ['car
      (seq (assert-cons rax)
-          (Mov rax (Offset rax (- 8 type-cons))))]
+          (Mov rax (Mem (- 8 type-cons) rax)))]
     ['cdr
      (seq (assert-cons rax)
-          (Mov rax (Offset rax (- type-cons))))]
+          (Mov rax (Mem (- type-cons) rax)))]
 
     ['empty? (seq (Cmp rax (value->bits '())) if-equal)]
     ['cons? (type-pred ptr-mask type-cons)]
@@ -103,9 +94,9 @@
           (Cmp r8 rax)
           if-equal)]
     ['cons
-     (seq (Mov (Offset rbx 0) rax)
+     (seq (Mov (Mem rbx) rax)
           (Pop rax)
-          (Mov (Offset rbx 8) rax)
+          (Mov (Mem 8 rbx) rax)
           (Mov rax rbx)
           (Xor rax type-cons)
           (Add rbx 16))]

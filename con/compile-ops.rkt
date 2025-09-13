@@ -1,9 +1,7 @@
 #lang racket
 (provide compile-op1)
 (require "ast.rkt")
-(require a86/ast)
-
-(define rax 'rax)
+(require a86/ast a86/registers)
 
 ;; Op1 -> Asm
 (define (compile-op1 p)
