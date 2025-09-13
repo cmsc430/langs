@@ -1,11 +1,9 @@
-UNAME := $(shell uname)
-
-ifeq ($(UNAME), Darwin)
-  format=macho64 --gprefix _
-  CC=arch -x86_64 gcc
+ifeq ($(shell uname), Darwin)
+  LANGS_CC ?= arch -x86_64 gcc
+  LANGS_AS ?= nasm -g -f macho64 --gprefix _
 else
-  format=elf64
-  CC=gcc
+  LANGS_CC ?= gcc
+  LANGS_AS ?= nasm -g -f elf64
 endif
 
 objs = \
@@ -24,13 +22,13 @@ runtime.o: $(objs)
 	ld -r $(objs) -o runtime.o
 
 %.run: %.o runtime.o
-	$(CC) runtime.o $< -o $@
+	$(LANGS_CC) runtime.o $< -o $@
 
 .c.o:
-	$(CC) -fPIC -c -g -o $@ $<
+	$(LANGS_CC) -fPIC -c -g -o $@ $<
 
 .s.o:
-	nasm -g -f $(format) -o $@ $<
+	$(LANGS_AS) -o $@ $<
 
 %.s: %.rkt
 	cat $< | racket -t compile-stdin.rkt -m > $@
