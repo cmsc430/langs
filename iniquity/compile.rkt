@@ -4,6 +4,9 @@
          compile-es
          compile-define)
 
+; for notes
+(provide rsp)
+
 (require "ast.rkt")
 (require "compile-ops.rkt")
 (require "types.rkt")
