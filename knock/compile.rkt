@@ -6,6 +6,9 @@
          compile-match
          compile-match-clause)
 
+; for notes
+(provide compile-pattern)
+
 (require "ast.rkt")
 (require "compile-ops.rkt")
 (require "types.rkt")
