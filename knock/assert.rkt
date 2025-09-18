@@ -5,13 +5,12 @@
 (require a86/ast)
 (require "types.rkt")
 
-(define r9 'r9)
-
 (define (assert-type mask type)
-  (λ (arg)
-    (seq (Mov r9 arg)
-         (And r9 mask)
-         (Cmp r9 type)
+  (λ (r)
+    (seq (Push r)
+         (And r mask)
+         (Cmp r type)
+         (Pop r)
          (Jne 'err))))
 
 ;; Register -> Asm
