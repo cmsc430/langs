@@ -5,7 +5,7 @@
 
 ;; Register -> Asm
 (define (assert-integer r)
-  (seq (Push r)       
+  (seq (Push r)
        (And r mask-int)
        (Cmp r type-int)
        (Pop r)
