@@ -13,12 +13,7 @@ objs = \
 	io.o \
 	symbol.o
 
-default: submit.zip
-
-submit.zip:
-	zip submit.zip -r * \
-		-x \*.[os] -x \*~ -x \*zip \
-		-x \*Zone.Identifier -x \*\*compiled\*\*
+default: runtime.o
 
 runtime.o: $(objs)
 	ld -r $(objs) -o runtime.o
