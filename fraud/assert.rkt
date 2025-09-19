@@ -3,20 +3,20 @@
 (require a86/ast)
 (require "types.rkt")
 
-(define r9 'r9)
-
 ;; Register -> Asm
 (define (assert-integer r)
-  (seq (Mov r9 r)
-       (And r9 mask-int)
-       (Cmp r9 type-int)
+  (seq (Push r)
+       (And r mask-int)
+       (Cmp r type-int)
+       (Pop r)
        (Jne 'err)))
 
 ;; Register -> Asm
 (define (assert-char r)
-  (seq (Mov r9 r)
-       (And r9 mask-char)
-       (Cmp r9 type-char)
+  (seq (Push r)
+       (And r mask-char)
+       (Cmp r type-char)
+       (Pop r)
        (Jne 'err)))
 
 ;; Register -> Asm
