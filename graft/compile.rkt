@@ -1,0 +1,142 @@
+#lang racket
+(provide compile
+         compile-e)
+
+(require "ast.rkt")
+(require "compile-ops.rkt")
+(require "types.rkt")
+(require a86/ast a86/registers)
+;; ClosedExpr -> Asm
+(define (compile e)
+  (prog (Global 'entry)
+        (Extern 'peek_byte)
+        (Extern 'read_byte)
+        (Extern 'write_byte)
+        (Extern 'raise_error)
+        (Label 'entry)
+        ;; save callee-saved register
+        (Push r15)
+        (compile-e e '())
+        ;; restore callee-save register
+        (Pop r15)
+        (Ret)
+        ;; Error handler
+        (Label 'err)
+        pad-stack
+        (Call 'raise_error)))
+
+;; type CEnv = (Listof [Maybe Id])
+;; Expr CEnv -> Asm
+(define (compile-e e c)  ;; where c closes e
+  (match e
+    [(Lit d) (compile-value d)]
+    [(Eof) (compile-value eof)]
+    [(Var x) (compile-variable x c)]
+    [(Prim0 p) (compile-prim0 p)]
+    [(Prim1 p e) (compile-prim1 p e c)]
+    [(Prim2 p e1 e2) (compile-prim2 p e1 e2 c)]
+    [(If e1 e2 e3)
+     (compile-if e1 e2 e3 c)]
+    [(Begin e1 e2)
+     (compile-begin e1 e2 c)]
+    [(Let x e1 e2)
+     (compile-let x e1 e2 c)]))
+
+;; Value -> Asm
+(define (compile-value v)
+  (if (compound-datum? v)
+      (compile-compound-datum v)
+      (seq (Mov rax (value->bits v)))))
+
+;; Datum -> Boolean
+(define (compound-datum? d)
+  (or (box? d) (cons? d)))
+
+;; Datum -> Asm
+(define (compile-compound-datum d)
+  (match (compile-inner-datum d)
+    [(list e is)
+     (seq (Data)
+          is
+          (Text)
+          (Lea rax e))]))
+
+;; Datum -> (list Arg Asm)
+(define (compile-inner-datum d)
+  (match d    
+    [(box d1)
+     (match (compile-inner-datum d1)
+       [(list e is)
+        (let ((l (gensym 'box)))
+          (list (Mem l type-box)
+                (seq (Label l)
+                     (Dq e)
+                     is)))])]
+    [(cons d1 d2)
+     (match (compile-inner-datum d1)
+       [(list e1 is1)
+        (match (compile-inner-datum d2)
+          [(list e2 is2)
+           (let ((l (gensym 'cons)))
+             (list (Mem l type-cons)
+                   (seq (Label l)
+                        (Dq e2)
+                        (Dq e1)
+                        is1
+                        is2)))])])]     
+    [_ (list (value->bits d)
+             (seq))]))
+
+;; Id CEnv -> Asm
+(define (compile-variable x c)
+  (let ((i (lookup x c)))
+    (seq (Mov rax (Mem i rsp)))))
+
+;; Op0 -> Asm
+(define (compile-prim0 p)
+  (compile-op0 p))
+
+;; Op1 Expr CEnv -> Asm
+(define (compile-prim1 p e c)
+  (seq (compile-e e c)
+       (compile-op1 p)))
+
+;; Op2 Expr Expr CEnv -> Asm
+(define (compile-prim2 p e1 e2 c)
+  (seq (compile-e e1 c)
+       (Push rax)
+       (compile-e e2 (cons #f c))
+       (compile-op2 p)))
+;; Expr Expr Expr CEnv -> Asm
+(define (compile-if e1 e2 e3 c)
+  (let ((l1 (gensym 'if))
+        (l2 (gensym 'if)))
+    (seq (compile-e e1 c)
+         (Cmp rax (value->bits #f))
+         (Je l1)
+         (compile-e e2 c)
+         (Jmp l2)
+         (Label l1)
+         (compile-e e3 c)
+         (Label l2))))
+;; Expr Expr CEnv -> Asm
+(define (compile-begin e1 e2 c)
+  (seq (compile-e e1 c)
+       (compile-e e2 c)))
+
+;; Id Expr Expr CEnv -> Asm
+(define (compile-let x e1 e2 c)
+  (seq (compile-e e1 c)
+       (Push rax)
+       (compile-e e2 (cons x c))
+       (Add rsp 8)))
+
+;; Id CEnv -> Integer
+(define (lookup x cenv)
+  (match cenv
+    ['() (error "undefined variable:" x)]
+    [(cons y rest)
+     (match (eq? x y)
+       [#t 0]
+       [#f (+ 8 (lookup x rest))])]))
+
