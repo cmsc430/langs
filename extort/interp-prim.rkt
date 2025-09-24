@@ -8,7 +8,7 @@
     ['peek-byte (peek-byte)]
     ['void      (void)]))
 
-;; Op1 Value -> Answer
+;; Op1 Value -> Value { raises 'err }
 (define (interp-prim1 op v)
   (match (list op v)
     [(list 'add1 (? integer?))            (add1 v)]
@@ -19,7 +19,7 @@
     [(list 'char->integer (? char?))      (char->integer v)]
     [(list 'write-byte    (? byte?))      (write-byte v)]
     [(list 'eof-object? v)                (eof-object? v)]
-    [_ 'err]))
+    [_ (raise 'err)]))
 
 ;; Any -> Boolean
 (define (codepoint? v)

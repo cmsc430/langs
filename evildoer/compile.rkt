@@ -22,8 +22,8 @@
 ;; Expr -> Asm
 (define (compile-e e)
   (match e
-    [(Lit d) (compile-value d)]
-    [(Eof) (compile-value eof)]
+    [(Lit d) (compile-datum d)]
+    [(Eof) (seq (Mov rax (value->bits eof)))]
     [(Prim0 p) (compile-prim0 p)]
     [(Prim1 p e) (compile-prim1 p e)]
     [(If e1 e2 e3)
@@ -31,9 +31,9 @@
     [(Begin e1 e2)
      (compile-begin e1 e2)]))
 
-;; Value -> Asm
-(define (compile-value v)
-  (seq (Mov rax (value->bits v))))
+;; Datum -> Asm
+(define (compile-datum d)
+  (seq (Mov rax (value->bits d))))
 
 ;; Op0 -> Asm
 (define (compile-prim0 p)

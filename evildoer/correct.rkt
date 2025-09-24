@@ -2,7 +2,7 @@
 (provide check-compiler)
 (require rackunit)
 (require "interp-io.rkt")
-(require "exec-io.rkt")
+(require "exec.rkt")
 ;; Expr String -> Void
 (define (check-compiler e i)
   (let ((r (with-handlers ([exn:fail? identity])

@@ -9,7 +9,6 @@
     (bits->value (asm-interp is))))
 
 ;; Asm String -> (cons Value String)
-;; Asm String -> (cons Answer String)
 (define (run/io is in)
   (parameterize ((current-objs (list (path->string runtime-path))))
     (match (asm-interp/io is in)

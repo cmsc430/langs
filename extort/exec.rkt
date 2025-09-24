@@ -1,13 +1,15 @@
 #lang racket
 (require a86/interp)
+(require "run.rkt")
 (require "compile.rkt")
 (require "types.rkt")
 (require "build-runtime.rkt")
-(provide exec)
+(provide exec exec/io)
 ;; Expr -> Answer
 (define (exec e)
-  (parameterize ((current-objs (list (path->string runtime-path))))
-    (match (asm-interp (compile e))
-      ['err 'err]
-      [b (bits->value b)])))
+  (run (compile e)))
+
+;; Expr String -> (cons Answer String)
+(define (exec/io e in)
+  (run/io (compile e) in))
 
