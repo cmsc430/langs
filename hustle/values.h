@@ -25,8 +25,8 @@ typedef struct val_box_t {
   val_t val;
 } val_box_t;
 typedef struct val_cons_t {
-  val_t snd;
   val_t fst;
+  val_t snd;
 } val_cons_t;
 
 /* return the type of x */
