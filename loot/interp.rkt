@@ -1,6 +1,5 @@
 #lang racket
 (provide interp)
-(provide interp-env)
 (provide interp-match-pat)
 (require "ast.rkt")
 (require "interp-prim.rkt")
@@ -22,81 +21,68 @@
 ;; type Answer = Value | 'err
 
 ;; type Env = (Listof (List Id Value))
+
+(define (err? x) (eq? x 'err))
+;; ClosedExpr -> Answer
 ;; Prog -> Answer
 (define (interp p)
-  (match p
-    [(Prog ds e)
-     (interp-env e '() ds)]))
-;; Expr Env Defns -> Answer
-(define (interp-env e r ds)
+  (with-handlers ([err? identity])
+    (match p
+      [(Prog ds e)
+       (interp-e e '() ds)])))
+;l Expr Env Defns -> Value { raises 'err }
+(define (interp-e e r ds) ;; where r closes e
   (match e
+    [(Var x) (interp-var x r ds)]
     [(Lit d) d]
     [(Eof)   eof]
-    [(Var x) (interp-var x r ds)]
-    [(Prim0 p) (interp-prim0 p)]
+    [(Prim0 p)
+     (interp-prim0 p)]
     [(Prim1 p e)
-     (match (interp-env e r ds)
-       ['err 'err]
-       [v (interp-prim1 p v)])]
+     (interp-prim1 p (interp-e e r ds))]
     [(Prim2 p e1 e2)
-     (match (interp-env e1 r ds)
-       ['err 'err]
-       [v1 (match (interp-env e2 r ds)
-             ['err 'err]
-             [v2 (interp-prim2 p v1 v2)])])]
+     (interp-prim2 p
+                   (interp-e e1 r ds)
+                   (interp-e e2 r ds))]
     [(Prim3 p e1 e2 e3)
-     (match (interp-env e1 r ds)
-       ['err 'err]
-       [v1 (match (interp-env e2 r ds)
-             ['err 'err]
-             [v2 (match (interp-env e3 r ds)
-                   ['err 'err]
-                   [v3 (interp-prim3 p v1 v2 v3)])])])]
-    [(If e0 e1 e2)
-     (match (interp-env e0 r ds)
-       ['err 'err]
-       [v
-        (if v
-            (interp-env e1 r ds)
-            (interp-env e2 r ds))])]
+     (interp-prim3 p
+                   (interp-e e1 r ds)
+                   (interp-e e2 r ds)
+                   (interp-e e3 r ds))]
+    [(If e1 e2 e3)
+     (if (interp-e e1 r ds)
+         (interp-e e2 r ds)
+         (interp-e e3 r ds))]
     [(Begin e1 e2)
-     (match (interp-env e1 r ds)
-       ['err 'err]
-       [v    (interp-env e2 r ds)])]
+     (begin (interp-e e1 r ds)
+            (interp-e e2 r ds))]
     [(Let x e1 e2)
-     (match (interp-env e1 r ds)
-       ['err 'err]
-       [v (interp-env e2 (ext r x v) ds)])]
+     (let ((v (interp-e e1 r ds)))
+       (interp-e e2 (ext r x v) ds))]
     [(App e es)
-     (match (interp-env e r ds)
-       ['err 'err]
-       [f
-        (match (interp-env* es r ds)
-          ['err 'err]
-          [vs
-           (if (procedure? f)
-               (apply f vs)
-               'err)])])]
+     (let ((f (interp-e e r ds))
+           (vs (interp-e* es r ds)))
+       (if (procedure? f)
+           (apply f vs)
+           (raise 'err)))]
     [(Match e ps es)
-     (match (interp-env e r ds)
-       ['err 'err]
-       [v
-        (interp-match v ps es r ds)])]
+     (let ((v (interp-e e r ds)))
+       (interp-match v ps es r ds))]
     [(Lam f xs e)
      (λ vs
        ; check arity matches
        (if (= (length xs) (length vs))
-           (interp-env e (append (zip xs vs) r) ds)
-           'err))]))
+           (interp-e e (append (zip xs vs) r) ds)
+           (raise 'err)))]))
 
 ;; (Listof Expr) REnv Defns -> (Listof Value) | 'err
-(define (interp-env* es r ds)
+(define (interp-e* es r ds)
   (match es
     ['() '()]
     [(cons e es)
-     (match (interp-env e r ds)
+     (match (interp-e e r ds)
        ['err 'err]
-       [v (match (interp-env* es r ds)
+       [v (match (interp-e* es r ds)
             ['err 'err]
             [vs (cons v vs)])])]))
 
@@ -104,7 +90,7 @@
 (define (interp-var x r ds)
   (match (lookup r x)
     ['err (match (defns-lookup ds x)
-            [(Defn f xs e) (interp-env (Lam f xs e) '() ds)]
+            [(Defn f xs e) (interp-e (Lam f xs e) '() ds)]
             [#f 'err])]
     [v v]))
 
@@ -115,7 +101,7 @@
     [((cons p ps) (cons e es))
      (match (interp-match-pat p v r)
        [#f (interp-match v ps es r ds)]
-       [r  (interp-env e r ds)])]))
+       [r  (interp-e e r ds)])]))
 ;; Pat Value Env -> [Maybe Env]
 (define (interp-match-pat p v r)
   (match p

@@ -4,7 +4,7 @@
 ;; Env Variable -> Answer
 (define (lookup env x)
   (match env
-    ['() (error 'lookup "unbound variable: ~a" x)]
+    ['() 'err]
     [(cons (list y i) env)
      (match (symbol=? x y)
        [#t i]

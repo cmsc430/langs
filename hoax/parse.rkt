@@ -24,10 +24,10 @@
     (match s
       [(and 'eof (? (not-in bvs)))
        (list fvs (Eof))]
-      [(? datum?)
+      [(? self-quoting-datum?)
        (list fvs (Lit s))]
-      [(list (and 'quote (? (not-in bvs))) (list))
-       (list fvs (Lit '()))]
+      [(list (and 'quote (? (not-in bvs))) (? datum? d))
+       (list fvs (Lit d))]
       [(? symbol?)
        (list (if (memq s bvs) fvs (cons s fvs)) (Var s))]
       [(list-rest (? symbol? (? (not-in bvs) k)) sr)
@@ -77,11 +77,16 @@
   (λ (x) (not (memq x xs))))
 
 ;; Any -> Boolean
-(define (datum? x)
+(define (self-quoting-datum? x)
   (or (exact-integer? x)
       (boolean? x)
       (char? x)
       (string? x)))
+
+;; Any -> Boolean
+(define (datum? x)
+  (or (self-quoting-datum? x)
+      (empty? x)))
 
 ;; Any -> Boolean
 (define (op0? x)

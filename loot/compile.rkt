@@ -77,7 +77,7 @@
       [(Lam f xs e)
        (let ((env  (append (reverse fvs) (reverse xs) (list #f))))
          (seq (Label (symbol->label f))
-              (Mov rax (Mem (* 8 (length xs)) rsp))
+              (Mov rax (Mem rsp (* 8 (length xs))))
               (copy-env-to-stack fvs 8)
               (compile-e e env #t)
               (Add rsp (* 8 (length env))) ; pop env
@@ -89,7 +89,7 @@
   (match fvs
     ['() (seq)]
     [(cons _ fvs)
-     (seq (Mov r9 (Mem (- off type-proc) rax))
+     (seq (Mov r9 (Mem rax (- off type-proc)))
           (Push r9)
           (copy-env-to-stack fvs (+ 8 off)))]))
 
@@ -97,8 +97,8 @@
 ;; Expr CEnv Boolean -> Asm
 (define (compile-e e c t?)
   (match e
-    [(Lit d) (compile-value d)]
-    [(Eof) (compile-value eof)]
+    [(Lit d) (compile-datum d)]
+    [(Eof) (seq (Mov rax (value->bits eof)))]
     [(Var x) (compile-variable x c)]
     [(Prim0 p) (compile-prim0 p)]
     [(Prim1 p e) (compile-prim1 p e c)]
@@ -116,37 +116,36 @@
      (compile-lam f xs e c)]
     [(Match e ps es) (compile-match e ps es c t?)]))
 
-;; Value -> Asm
-(define (compile-value v)
-  (cond [(string? v) (compile-string v)]
-        [else        (Mov rax (value->bits v))]))
+;; Datum -> Asm
+(define (compile-datum d)
+  (cond [(string? d) (compile-string d)]
+        [else (seq (Mov rax (value->bits d)))]))
+
+;; String -> Asm
+(define (compile-string s)
+  (let ((l (gensym 'string))
+        (n (string-length s)))
+    (seq (Data)
+         (Label l)
+         (Dq n)
+         (compile-string-chars (string->list s))
+         (if (odd? n) (Dw 0) (seq))
+         (Text)
+         (Lea rax (Mem l type-str)))))
+
+;; [Listof Char] -> Asm
+(define (compile-string-chars cs)
+  (match cs
+    ['() (seq)]
+    [(cons c cs)
+     (seq (Dd (char->integer c))
+          (compile-string-chars cs))]))
+
 
 ;; Id CEnv -> Asm
 (define (compile-variable x c)
   (let ((i (lookup x c)))
-    (seq (Mov rax (Mem i rsp)))))
-
-;; String -> Asm
-(define (compile-string s)
-  (let ((len (string-length s)))
-    (if (zero? len)
-        (seq (Mov rax type-str))
-        (seq (Mov rax len)
-             (Mov (Mem rbx) rax)
-             (compile-string-chars (string->list s) 8)
-             (Mov rax rbx)
-             (Xor rax type-str)
-             (Add rbx
-                  (+ 8 (* 4 (if (odd? len) (add1 len) len))))))))
-
-;; [Listof Char] Integer -> Asm
-(define (compile-string-chars cs i)
-  (match cs
-    ['() (seq)]
-    [(cons c cs)
-     (seq (Mov rax (char->integer c))
-          (Mov (Mem i rbx) eax)
-          (compile-string-chars cs (+ 4 i)))]))
+    (seq (Mov rax (Mem rsp i)))))
 
 ;; Op0 -> Asm
 (define (compile-prim0 p)
@@ -208,9 +207,9 @@
   (seq (compile-es (cons e es) c)
        (move-args (add1 (length es)) (length c))
        (Add rsp (* 8 (length c)))
-       (Mov rax (Mem (* 8 (length es)) rsp))
+       (Mov rax (Mem rsp (* 8 (length es))))
        (assert-proc rax)
-       (Mov rax (Mem (- type-proc) rax))
+       (Mov rax (Mem rax (- type-proc)))
        (Jmp rax)))
 
 ;; Integer Integer -> Asm
@@ -218,8 +217,8 @@
   (cond [(zero? off) (seq)]
         [(zero? i)   (seq)]
         [else
-         (seq (Mov r8 (Mem (* 8 (sub1 i)) rsp))
-              (Mov (Mem (* 8 (+ off (sub1 i))) rsp) r8)
+         (seq (Mov r8 (Mem rsp (* 8 (sub1 i))))
+              (Mov (Mem rsp (* 8 (+ off (sub1 i)))) r8)
               (move-args (sub1 i) off))]))
 
 ;; Expr [Listof Expr] CEnv -> Asm
@@ -231,9 +230,9 @@
     (seq (Lea rax r)
          (Push rax)
          (compile-es (cons e es) (cons #f c))
-         (Mov rax (Mem i rsp))
+         (Mov rax (Mem rsp i))
          (assert-proc rax)
-         (Mov rax (Mem (- type-proc) rax)) ; fetch the code label
+         (Mov rax (Mem rax (- type-proc))) ; fetch the code label
          (Jmp rax)
          (Label r))))
 
@@ -252,7 +251,7 @@
     [(cons (Defn f xs e) ds)
      (let ((fvs (fv (Lam f xs e))))
        (seq (Lea rax (symbol->label f))
-            (Mov (Mem off rbx) rax)
+            (Mov (Mem rbx off) rax)
             (Mov rax rbx)
             (Add rax off)
             (Xor rax type-proc)
@@ -293,8 +292,8 @@
   (match fvs
     ['() (seq)]
     [(cons x fvs)
-     (seq (Mov r8 (Mem (lookup x c) rsp))
-          (Mov (Mem off rbx) r8)
+     (seq (Mov r8 (Mem rsp (lookup x c)))
+          (Mov (Mem rbx off) r8)
           (free-vars-to-heap fvs c (+ off 8)))]))
 
 ;; [Listof Expr] CEnv -> Asm
@@ -346,7 +345,7 @@
     [(Lit l)
      (let ((ok (gensym)))
        (list (seq (Mov r8 rax)
-                  (compile-value l)
+                  (compile-datum l)
                   (Cmp rax r8)
                   (Je ok)
                   (Add rsp (* 8 (length cm)))
@@ -361,7 +360,7 @@
            (list
             (seq (Push rax)
                  i1
-                 (Mov rax (Mem (* 8 (- (sub1 (length cm1)) (length cm))) rsp))
+                 (Mov rax (Mem rsp (* 8 (- (sub1 (length cm1)) (length cm)))))
                  i2)
             cm2)])])]
     [(Box p)
@@ -376,7 +375,7 @@
                 (Add rsp (* 8 (length cm))) ; haven't pushed anything yet
                 (Jmp next)
                 (Label ok)
-                (Mov rax (Mem (- type-box) rax))
+                (Mov rax (Mem rax (- type-box)))
                 i1)
            cm1))])]
     [(Cons p1 p2)
@@ -394,11 +393,11 @@
                    (Jmp next)
                    (Label ok)
                    (Xor rax type-cons)
-                   (Mov r8 (Mem rax))
+                   (Mov r8 (Mem rax 8))
                    (Push r8)                ; push cdr
-                   (Mov rax (Mem 8 rax))    ; mov rax car
+                   (Mov rax (Mem rax 0))    ; mov rax car
                    i1
-                   (Mov rax (Mem (* 8 (- (sub1 (length cm1)) (length cm))) rsp))
+                   (Mov rax (Mem rsp (* 8 (- (sub1 (length cm1)) (length cm)))))
                    i2)
               cm2))])])]))
 

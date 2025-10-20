@@ -14,6 +14,7 @@
 (define type-char #b01000)
 (define mask-char #b11111)
 
+;; Integer -> Value
 (define (bits->value b)
   (cond [(= b (value->bits #t))  #t]
         [(= b (value->bits #f)) #f]
@@ -25,19 +26,21 @@
         [(char-bits? b)
          (integer->char (arithmetic-shift b (- char-shift)))]
         [(box-bits? b)
-         (box (bits->value (mem-ref b)))]
+         (box (bits->value (mem-ref (- b type-box))))]
         [(cons-bits? b)
-         (cons (bits->value (mem-ref (+ b 8)))
-               (bits->value (mem-ref b)))]
+         (cons (bits->value (mem-ref (+ 0 (- b type-cons))))
+               (bits->value (mem-ref (+ 8 (- b type-cons)))))]
         [else (error "invalid bits")]))
 
+;; Value -> Integer
+;; v must be an immediate
 (define (value->bits v)
   (cond [(eq? v #t) #b00011000]
         [(eq? v #f) #b00111000]
+        [(eq? v eof) #b01011000]
+        [(eq? v (void)) #b01111000]
+        [(eq? v '()) #b10011000]
         [(integer? v) (arithmetic-shift v int-shift)]
-        [(eof-object? v) #b01011000]
-        [(void? v) #b01111000]
-        [(empty? v)      #b10011000]
         [(char? v)
          (bitwise-ior type-char
                       (arithmetic-shift (char->integer v) char-shift))]
@@ -58,10 +61,6 @@
 (define (box-bits? v)
   (= type-box (bitwise-and v imm-mask)))
 
-(define (untag i)
-  (arithmetic-shift (arithmetic-shift i (- (integer-length ptr-mask)))
-                    (integer-length ptr-mask)))
-
 (define (mem-ref i)
-  (ptr-ref (cast (untag i) _int64 _pointer) _int64))
+  (ptr-ref (cast i _int64 _pointer) _int64))
 

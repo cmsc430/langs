@@ -4,12 +4,15 @@
 (define mask-int   #b1)
 (define type-int   #b0)
 
+;; Integer -> Value
 (define (bits->value b)
   (cond [(= b (value->bits #t))  #t]
         [(= b (value->bits #f)) #f]
         [(int-bits? b)
          (arithmetic-shift b (- int-shift))]
         [else (error "invalid bits")]))
+
+;; Value -> Integer
 
 (define (value->bits v)
   (cond [(eq? v #t) #b01]

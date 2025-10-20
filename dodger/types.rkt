@@ -7,6 +7,7 @@
 (define type-char #b01)
 (define mask-char #b11)
 
+;; Integer -> Value
 (define (bits->value b)
   (cond [(= b (value->bits #t))  #t]
         [(= b (value->bits #f)) #f]
@@ -15,6 +16,8 @@
         [(char-bits? b)
          (integer->char (arithmetic-shift b (- char-shift)))]
         [else (error "invalid bits")]))
+
+;; Value -> Integer
 
 (define (value->bits v)
   (cond [(eq? v #t) #b011]

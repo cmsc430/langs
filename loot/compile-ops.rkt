@@ -54,13 +54,13 @@
           (Add rbx 8))]
     ['unbox
      (seq (assert-box rax)
-          (Mov rax (Mem (- type-box) rax)))]
+          (Mov rax (Mem rax (- type-box))))]
     ['car
      (seq (assert-cons rax)
-          (Mov rax (Mem (- 8 type-cons) rax)))]
+          (Mov rax (Mem rax (- 0 type-cons))))]
     ['cdr
      (seq (assert-cons rax)
-          (Mov rax (Mem (- type-cons) rax)))]
+          (Mov rax (Mem rax (- 8 type-cons))))]
 
     ['empty? (seq (Cmp rax (value->bits '())) if-equal)]
     ['cons? (type-pred ptr-mask type-cons)]
@@ -73,7 +73,7 @@
        (seq (assert-vector rax)
             (Cmp rax type-vect)
             (Je zero)
-            (Mov rax (Mem (- type-vect) rax))
+            (Mov rax (Mem rax (- type-vect)))
             (Sal rax int-shift)
             (Jmp done)
             (Label zero)
@@ -85,7 +85,7 @@
        (seq (assert-string rax)
             (Cmp rax type-str)
             (Je zero)
-            (Mov rax (Mem (- type-str) rax))
+            (Mov rax (Mem rax (- type-str)))
             (Sal rax int-shift)
             (Jmp done)
             (Label zero)
@@ -120,9 +120,9 @@
           (Cmp r8 rax)
           if-equal)]
     ['cons
-     (seq (Mov (Mem rbx) rax)
+     (seq (Mov (Mem rbx 8) rax)
           (Pop rax)
-          (Mov (Mem 8 rbx) rax)
+          (Mov (Mem rbx 0) rax)
           (Mov rax rbx)
           (Xor rax type-cons)
           (Add rbx 16))]
@@ -175,7 +175,7 @@
           (Jl 'err)
           (Sal rax 3)
           (Add r8 rax)
-          (Mov rax (Mem 8 r8)))]
+          (Mov rax (Mem r8 8)))]
     ['make-string
      (let ((loop (gensym))
            (done (gensym))
@@ -228,7 +228,7 @@
           (Jl 'err)
           (Sal rax 2)
           (Add r8 rax)
-          (Mov eax (Mem 8 r8))
+          (Mov eax (Mem r8 8))
           (Sal rax char-shift)
           (Xor rax type-char))]))
 
@@ -252,7 +252,7 @@
           (Jl 'err)
           (Sal r10 3)
           (Add r8 r10)
-          (Mov (Mem 8 r8) rax)
+          (Mov (Mem r8 8) rax)
           (Mov rax (value->bits (void))))]))
 
 (define (type-pred mask type)
