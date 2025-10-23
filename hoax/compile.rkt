@@ -27,7 +27,10 @@
         ;; Error handler
         (Label 'err)
         pad-stack
-        (Call 'raise_error)))
+        (Call 'raise_error)
+        (Data)
+        (Label 'empty)
+        (Dq 0)))
 
 ;; type CEnv = (Listof [Maybe Id])
 ;; Expr CEnv -> Asm
@@ -56,13 +59,16 @@
 (define (compile-string s)
   (let ((l (gensym 'string))
         (n (string-length s)))
-    (seq (Data)
-         (Label l)
-         (Dq n)
-         (compile-string-chars (string->list s))
-         (if (odd? n) (Dw 0) (seq))
-         (Text)
-         (Lea rax (Mem l type-str)))))
+    (match s
+      ["" (seq (Lea rax (Mem 'empty type-str)))]
+      [_
+       (seq (Data)
+            (Label l)
+            (Dq (value->bits n))
+            (compile-string-chars (string->list s))
+            (if (odd? n) (Dd 0) (seq))
+            (Text)
+            (Lea rax (Mem l type-str)))])))
 
 ;; [Listof Char] -> Asm
 (define (compile-string-chars cs)

@@ -35,18 +35,14 @@
 
         [(vect-bits? b)
          (let ((p (- b type-vect)))
-           (if (zero? p)
-               (vector)
-               (build-vector (mem-ref p)
-                             (lambda (j)
-                               (bits->value (mem-ref (+ p (* 8 (add1 j)))))))))]
+           (build-vector (bits->value (mem-ref p))
+                         (lambda (j)
+                           (bits->value (mem-ref (+ p (* 8 (add1 j))))))))]
         [(str-bits? b)
          (let ((p (- b type-str)))
-           (if (zero? p)
-               (string)
-               (build-string (mem-ref p)
-                             (lambda (j)
-                               (char-ref (+ p 8) j)))))]
+           (build-string (bits->value (mem-ref p))
+                         (lambda (j)
+                           (integer->char (mem-ref32 (+ p 8 (* 4 j)))))))]
         [else (error "invalid bits")]))
 
 ;; Value -> Integer
@@ -87,6 +83,6 @@
 (define (mem-ref i)
   (ptr-ref (cast i _int64 _pointer) _int64))
 
-(define (char-ref i j)
-  (integer->char (ptr-ref (cast i _int64 _pointer) _uint32 j)))
+(define (mem-ref32 i)
+  (ptr-ref (cast i _int64 _pointer) _int32))
 

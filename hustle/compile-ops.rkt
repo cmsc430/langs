@@ -66,7 +66,6 @@
     ['cons? (type-pred ptr-mask type-cons)]
     ['box?  (type-pred ptr-mask type-box)]))
 
-
 ;; Op2 -> Asm
 (define (compile-op2 p)
   (match p
