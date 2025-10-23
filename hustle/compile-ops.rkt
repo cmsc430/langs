@@ -54,18 +54,17 @@
           (Add rbx 8))]
     ['unbox
      (seq (assert-box rax)
-          (Mov rax (Mem (- type-box) rax)))]
+          (Mov rax (Mem rax (- type-box))))]
     ['car
      (seq (assert-cons rax)
-          (Mov rax (Mem (- 8 type-cons) rax)))]
+          (Mov rax (Mem rax (- 0 type-cons))))]
     ['cdr
      (seq (assert-cons rax)
-          (Mov rax (Mem (- type-cons) rax)))]
+          (Mov rax (Mem rax (- 8 type-cons))))]
 
     ['empty? (seq (Cmp rax (value->bits '())) if-equal)]
     ['cons? (type-pred ptr-mask type-cons)]
     ['box?  (type-pred ptr-mask type-box)]))
-
 
 ;; Op2 -> Asm
 (define (compile-op2 p)
@@ -94,9 +93,9 @@
           (Cmp r8 rax)
           if-equal)]
     ['cons
-     (seq (Mov (Mem rbx) rax)
+     (seq (Mov (Mem rbx 8) rax)
           (Pop rax)
-          (Mov (Mem 8 rbx) rax)
+          (Mov (Mem rbx 0) rax)
           (Mov rax rbx)
           (Xor rax type-cons)
           (Add rbx 16))]

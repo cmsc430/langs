@@ -48,7 +48,6 @@
           (Call 'write_byte)
           unpad-stack)]))
 
-
 ;; Op2 -> Asm
 (define (compile-op2 p)
   (match p

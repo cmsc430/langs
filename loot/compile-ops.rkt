@@ -54,13 +54,13 @@
           (Add rbx 8))]
     ['unbox
      (seq (assert-box rax)
-          (Mov rax (Mem (- type-box) rax)))]
+          (Mov rax (Mem rax (- type-box))))]
     ['car
      (seq (assert-cons rax)
-          (Mov rax (Mem (- 8 type-cons) rax)))]
+          (Mov rax (Mem rax (- 0 type-cons))))]
     ['cdr
      (seq (assert-cons rax)
-          (Mov rax (Mem (- type-cons) rax)))]
+          (Mov rax (Mem rax (- 8 type-cons))))]
 
     ['empty? (seq (Cmp rax (value->bits '())) if-equal)]
     ['cons? (type-pred ptr-mask type-cons)]
@@ -68,30 +68,11 @@
     ['vector? (type-pred ptr-mask type-vect)]
     ['string? (type-pred ptr-mask type-str)]
     ['vector-length
-     (let ((zero (gensym))
-           (done (gensym)))
-       (seq (assert-vector rax)
-            (Cmp rax type-vect)
-            (Je zero)
-            (Mov rax (Mem (- type-vect) rax))
-            (Sal rax int-shift)
-            (Jmp done)
-            (Label zero)
-            (Mov rax 0)
-            (Label done)))]
+     (seq (assert-vector rax)
+          (Mov rax (Mem rax (- type-vect))))]
     ['string-length
-     (let ((zero (gensym))
-           (done (gensym)))
-       (seq (assert-string rax)
-            (Cmp rax type-str)
-            (Je zero)
-            (Mov rax (Mem (- type-str) rax))
-            (Sal rax int-shift)
-            (Jmp done)
-            (Label zero)
-            (Mov rax 0)
-            (Label done)))]))
-
+     (seq (assert-string rax)
+          (Mov rax (Mem rax (- type-str))))]))
 
 ;; Op2 -> Asm
 (define (compile-op2 p)
@@ -120,9 +101,9 @@
           (Cmp r8 rax)
           if-equal)]
     ['cons
-     (seq (Mov (Mem rbx) rax)
+     (seq (Mov (Mem rbx 8) rax)
           (Pop rax)
-          (Mov (Mem 8 rbx) rax)
+          (Mov (Mem rbx 0) rax)
           (Mov rax rbx)
           (Xor rax type-cons)
           (Add rbx 16))]
@@ -130,107 +111,103 @@
      (seq (Pop r8)
           (Cmp rax r8)
           if-equal)]
-    ['make-vector ;; size value
-     (let ((loop (gensym))
-           (done (gensym))
-           (empty (gensym)))
-       (seq (Pop r8) ;; r8 = size
-            (assert-natural r8)
-            (Cmp r8 0) ; special case empty vector
-            (Je empty)
+    ['make-vector
+     (let ((nonzero (gensym 'nz))
+           (loop (gensym 'loop))
+           (theend (gensym 'theend)))
 
-            (Mov r9 rbx)
-            (Xor r9 type-vect)
-
-            (Sar r8 int-shift)
-            (Mov (Mem rbx) r8)
-            (Add rbx 8)
-
-            (Label loop)
-            (Mov (Mem rbx) rax)
-            (Add rbx 8)
-            (Sub r8 1)
-            (Cmp r8 0)
-            (Jne loop)
-
-            (Mov rax r9)
-            (Jmp done)
-
-            (Label empty)
-            (Mov rax type-vect)
-            (Label done)))]
-    ['vector-ref ; vector index
-     (seq (Pop r8)
-          (assert-vector r8)
-          (assert-integer rax)
-          (Cmp r8 type-vect)
-          (Je 'err) ; special case for empty vector
-          (Cmp rax 0)
-          (Jl 'err)
-          (Xor r8 type-vect)      ; r8 = ptr
-          (Mov r9 (Mem r8))       ; r9 = len
-          (Sar rax int-shift)     ; rax = index
-          (Sub r9 1)
-          (Cmp r9 rax)
-          (Jl 'err)
-          (Sal rax 3)
-          (Add r8 rax)
-          (Mov rax (Mem 8 r8)))]
-    ['make-string
-     (let ((loop (gensym))
-           (done (gensym))
-           (empty (gensym)))
        (seq (Pop r8)
             (assert-natural r8)
-            (assert-char rax)
-            (Cmp r8 0) ; special case empty string
-            (Je empty)
 
-            (Mov r9 rbx)
-            (Xor r9 type-str)
+            ; special case for length = 0
+            (Cmp r8 0)
+            (Jne nonzero)
+            ; return canonical representation
+            (Lea rax (Mem 'empty type-vect))
+            (Jmp theend)
 
-            (Sar r8 int-shift)
-            (Mov (Mem rbx) r8)
-            (Add rbx 8)
+            ; Code for nonzero case
+            (Label nonzero)
+            (Mov (Mem rbx 0) r8) ; write length
+            (Sar r8 1)           ; convert to bytes
+            (Mov r9 r8)          ; save for heap adjustment
 
-            (Sar rax char-shift)
-
-            (Add r8 1) ; adds 1
-            (Sar r8 1) ; when
-            (Sal r8 1) ; len is odd
-
+            ; start initialization
             (Label loop)
-            (Mov (Mem rbx) eax)
-            (Add rbx 4)
-            (Sub r8 1)
+            (Mov (Mem rbx r8) rax)
+            (Sub r8 8)
             (Cmp r8 0)
             (Jne loop)
+            ; end initialization
 
-            (Mov rax r9)
-            (Jmp done)
+            (Mov rax rbx)
+            (Xor rax type-vect)  ; create tagged pointer
+            (Add rbx r9)         ; acct for elements and stored length
+            (Add rbx 8)
+            (Label theend)))]
 
-            (Label empty)
-            (Mov rax type-str)
-            (Label done)))]
+    ['vector-ref
+     (seq (Pop r8)
+          (assert-vector r8)
+          (assert-natural rax)
+          (Mov r9 (Mem r8 (- type-vect)))
+          (Cmp rax r9)
+          (Jge 'err)
+          (Sar rax 1)
+          (Mov rax (Mem r8 rax (- 8 type-vect))))]
+    ['make-string
+     (let ((nonzero (gensym 'nz))
+           (loop (gensym 'loop))
+           (theend (gensym 'theend)))
+       (seq (Pop r8)
+            (assert-natural r8)
+
+            ; special case for length = 0
+            (Cmp r8 0)
+            (Jne nonzero)
+            ; return canonical representation
+            (Lea rax (Mem 'empty type-str))
+            (Jmp theend)
+
+            ; Code for nonzero case
+            (Label nonzero)
+
+            (Mov (Mem rbx 0) r8) ; write length
+            (Sar r8 2)           ; convert to bytes
+            (Mov r9 r8)          ; save for heap adjustment
+
+            (Sar rax char-shift) ; convert to codepoint
+
+            ; start initialization
+            (Label loop)
+            (Mov (Mem rbx r8 4) eax)
+            (Sub r8 4)
+            (Cmp r8 0)
+            (Jne loop)
+            ; end initialization
+
+            (Mov rax rbx)
+            (Xor rax type-str)   ; create tagged pointer
+            (Add rbx r9)         ; acct for elements and stored length
+            (Add rbx 8)
+            ; Pad to 8-byte alignment
+            (Add rbx 4)
+            (Sar rbx 3)
+            (Sal rbx 3)
+            (Label theend)))]
+
     ['string-ref
      (seq (Pop r8)
+          (assert-natural rax)
           (assert-string r8)
-          (assert-integer rax)
-          (Cmp r8 type-str)
-          (Je 'err) ; special case for empty string
-          (Cmp rax 0)
-          (Jl 'err)
-          (Xor r8 type-str)       ; r8 = ptr
-          (Mov r9 (Mem r8))  ; r9 = len
-          (Sar rax int-shift)     ; rax = index
-          (Sub r9 1)
-          (Cmp r9 rax)
-          (Jl 'err)
-          (Sal rax 2)
-          (Add r8 rax)
-          (Mov eax (Mem 8 r8))
+          (Mov r9 (Mem r8 (- type-str)))
+          (Cmp rax r9)
+          (Jge 'err)
+          (Sar rax 2)
+          (Mov eax (Mem r8 rax (- 8 type-str)))
           (Sal rax char-shift)
           (Xor rax type-char))]))
+
 
 ;; Op3 -> Asm
 (define (compile-op3 p)
@@ -240,8 +217,6 @@
           (Pop r8)
           (assert-vector r8)
           (assert-integer r10)
-          (Cmp r8 type-vect)
-          (Je 'err)
           (Cmp r10 0)
           (Jl 'err)
           (Xor r8 type-vect)       ; r8 = ptr
@@ -252,7 +227,7 @@
           (Jl 'err)
           (Sal r10 3)
           (Add r8 r10)
-          (Mov (Mem 8 r8) rax)
+          (Mov (Mem r8 8) rax)
           (Mov rax (value->bits (void))))]))
 
 (define (type-pred mask type)

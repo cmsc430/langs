@@ -33,7 +33,10 @@
            (compile-defines ds)
            (Label 'err)
            pad-stack
-           (Call 'raise_error))]))
+           (Call 'raise_error)
+           (Data)
+           (Label 'empty)
+           (Dq 0))]))
 
 ;; [Listof Defn] -> Asm
 (define (compile-defines ds)
@@ -56,8 +59,8 @@
 ;; Expr CEnv -> Asm
 (define (compile-e e c)
   (match e
-    [(Lit d) (compile-value d)]
-    [(Eof) (compile-value eof)]
+    [(Lit d) (compile-datum d)]
+    [(Eof) (seq (Mov rax (value->bits eof)))]
     [(Var x) (compile-variable x c)]
     [(Prim0 p) (compile-prim0 p)]
     [(Prim1 p e) (compile-prim1 p e c)]
@@ -72,37 +75,39 @@
     [(App f es)
      (compile-app f es c)]))
 
-;; Value -> Asm
-(define (compile-value v)
-  (cond [(string? v) (compile-string v)]
-        [else        (Mov rax (value->bits v))]))
+;; Datum -> Asm
+(define (compile-datum d)
+  (cond [(string? d) (compile-string d)]
+        [else (seq (Mov rax (value->bits d)))]))
+
+;; String -> Asm
+(define (compile-string s)
+  (let ((l (gensym 'string))
+        (n (string-length s)))
+    (match s
+      ["" (seq (Lea rax (Mem 'empty type-str)))]
+      [_
+       (seq (Data)
+            (Label l)
+            (Dq (value->bits n))
+            (compile-string-chars (string->list s))
+            (if (odd? n) (Dd 0) (seq))
+            (Text)
+            (Lea rax (Mem l type-str)))])))
+
+;; [Listof Char] -> Asm
+(define (compile-string-chars cs)
+  (match cs
+    ['() (seq)]
+    [(cons c cs)
+     (seq (Dd (char->integer c))
+          (compile-string-chars cs))]))
+
 
 ;; Id CEnv -> Asm
 (define (compile-variable x c)
   (let ((i (lookup x c)))
-    (seq (Mov rax (Mem i rsp)))))
-
-;; String -> Asm
-(define (compile-string s)
-  (let ((len (string-length s)))
-    (if (zero? len)
-        (seq (Mov rax type-str))
-        (seq (Mov rax len)
-             (Mov (Mem rbx) rax)
-             (compile-string-chars (string->list s) 8)
-             (Mov rax rbx)
-             (Xor rax type-str)
-             (Add rbx
-                  (+ 8 (* 4 (if (odd? len) (add1 len) len))))))))
-
-;; [Listof Char] Integer -> Asm
-(define (compile-string-chars cs i)
-  (match cs
-    ['() (seq)]
-    [(cons c cs)
-     (seq (Mov rax (char->integer c))
-          (Mov (Mem i rbx) eax)
-          (compile-string-chars cs (+ 4 i)))]))
+    (seq (Mov rax (Mem rsp i)))))
 
 ;; Op0 -> Asm
 (define (compile-prim0 p)

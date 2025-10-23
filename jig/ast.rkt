@@ -26,14 +26,16 @@
 ;; type Datum = Integer
 ;;            | Boolean
 ;;            | Character
+;;            | '()
 ;;            | String
 ;; type Op0 = 'read-byte | 'peek-byte | 'void
 ;; type Op1 = 'add1 | 'sub1
 ;;          | 'zero?
 ;;          | 'char? | 'integer->char | 'char->integer
 ;;          | 'write-byte | 'eof-object?
-;;          | 'box | 'car | 'cdr | 'unbox
+;;          | 'car | 'cdr | 'unbox
 ;;          | 'empty? | 'cons? | 'box?
+;;          | 'box
 ;;          | 'vector? | 'vector-length
 ;;          | 'string? | 'string-length
 ;; type Op2 = '+ | '- | '< | '=

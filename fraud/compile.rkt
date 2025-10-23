@@ -46,10 +46,11 @@
 (define (compile-datum d)
   (seq (Mov rax (value->bits d))))
 
+
 ;; Id CEnv -> Asm
 (define (compile-variable x c)
   (let ((i (lookup x c)))
-    (seq (Mov rax (Mem i rsp)))))
+    (seq (Mov rax (Mem rsp i)))))
 
 ;; Op0 -> Asm
 (define (compile-prim0 p)

@@ -243,11 +243,16 @@
   (λ (x) (memq x m)))
 
 ;; Any -> Boolean
-(define (datum? x)
+(define (self-quoting-datum? x)
   (or (exact-integer? x)
       (boolean? x)
       (char? x)
       (string? x)))
+
+;; Any -> Boolean
+(define (datum? x)
+  (or (self-quoting-datum? x)
+      (empty? x)))
 
 ;; Any -> Boolean
 (define (op0? x)

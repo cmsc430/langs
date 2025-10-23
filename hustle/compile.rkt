@@ -33,8 +33,8 @@
 ;; Expr CEnv -> Asm
 (define (compile-e e c)  ;; where c closes e
   (match e
-    [(Lit d) (compile-value d)]
-    [(Eof) (compile-value eof)]
+    [(Lit d) (compile-datum d)]
+    [(Eof) (seq (Mov rax (value->bits eof)))]
     [(Var x) (compile-variable x c)]
     [(Prim0 p) (compile-prim0 p)]
     [(Prim1 p e) (compile-prim1 p e c)]
@@ -46,14 +46,15 @@
     [(Let x e1 e2)
      (compile-let x e1 e2 c)]))
 
-;; Value -> Asm
-(define (compile-value v)
-  (seq (Mov rax (value->bits v))))
+;; Datum -> Asm
+(define (compile-datum d)
+  (seq (Mov rax (value->bits d))))
+
 
 ;; Id CEnv -> Asm
 (define (compile-variable x c)
   (let ((i (lookup x c)))
-    (seq (Mov rax (Mem i rsp)))))
+    (seq (Mov rax (Mem rsp i)))))
 
 ;; Op0 -> Asm
 (define (compile-prim0 p)

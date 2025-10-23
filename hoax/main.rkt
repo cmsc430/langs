@@ -7,7 +7,6 @@
 (require "types.rkt")
 (require "run.rkt")
 (require "exec.rkt")
-(require "exec-io.rkt")
 (provide (all-from-out "ast.rkt"))
 (provide (all-from-out "parse.rkt"))
 (provide (all-from-out "interp.rkt"))
@@ -16,5 +15,4 @@
 (provide (all-from-out "types.rkt"))
 (provide (all-from-out "run.rkt"))
 (provide (all-from-out "exec.rkt"))
-(provide (all-from-out "exec-io.rkt"))
 

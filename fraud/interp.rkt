@@ -20,7 +20,7 @@
 (define (interp e)
   (with-handlers ([err? identity])
     (interp-e e '())))
-;; Expr -> Value Env { raises 'err }
+;; Expr Env -> Value { raises 'err }
 (define (interp-e e r) ;; where r closes e
   (match e
     [(Var x) (lookup r x)]
