@@ -1,5 +1,5 @@
 #lang racket
-(provide interp)
+(provide interp interp-e)
 (provide interp-match-pat)
 (require "ast.rkt")
 (require "interp-prim.rkt")
