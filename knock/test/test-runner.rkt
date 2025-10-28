@@ -143,6 +143,7 @@
     (check-equal? (run '"") "")
     (check-equal? (run '"fred") "fred")
     (check-equal? (run '"wilma") "wilma")
+    (check-equal? (run '(make-string 0 #t)) 'err)
     (check-equal? (run '(make-string 0 #\f)) "")
     (check-equal? (run '(make-string 3 #\f)) "fff")
     (check-equal? (run '(make-string 3 #\g)) "ggg")
