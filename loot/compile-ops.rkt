@@ -161,6 +161,7 @@
            (theend (gensym 'theend)))
        (seq (Pop r8)
             (assert-natural r8)
+            (assert-char rax)
 
             ; special case for length = 0
             (Cmp r8 0)
