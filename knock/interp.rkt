@@ -70,16 +70,13 @@
      (let ((v (interp-e e r ds)))
        (interp-match v ps es r ds))]))
 
-;; (Listof Expr) REnv Defns -> (Listof Value) | 'err
+;; (Listof Expr) REnv Defns -> (Listof Value) { raises 'err }
 (define (interp-e* es r ds)
   (match es
     ['() '()]
     [(cons e es)
-     (match (interp-e e r ds)
-       ['err 'err]
-       [v (match (interp-e* es r ds)
-            ['err 'err]
-            [vs (cons v vs)])])]))
+     (cons (interp-e e r ds)
+           (interp-e* es r ds))]))
 
 ;; Value [Listof Pat] [Listof Expr] Env Defns -> Answer
 (define (interp-match v ps es r ds)

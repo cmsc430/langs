@@ -75,16 +75,13 @@
            (interp-e e (append (zip xs vs) r) ds)
            (raise 'err)))]))
 
-;; (Listof Expr) REnv Defns -> (Listof Value) | 'err
+;; (Listof Expr) REnv Defns -> (Listof Value) { raises 'err }
 (define (interp-e* es r ds)
   (match es
     ['() '()]
     [(cons e es)
-     (match (interp-e e r ds)
-       ['err 'err]
-       [v (match (interp-e* es r ds)
-            ['err 'err]
-            [vs (cons v vs)])])]))
+     (cons (interp-e e r ds)
+           (interp-e* es r ds))]))
 
 ;; Id Env [Listof Defn] -> Answer
 (define (interp-var x r ds)
