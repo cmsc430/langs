@@ -6,7 +6,7 @@
 
 (unless (system (string-append "make -C '"
                                (path->string (normalize-path here))
-                               "' -s runtime.o"))
+                               "' --no-print-directory -s runtime.o"))
   (error 'build-runtime "could not build runtime"))
 
 (define runtime-path
