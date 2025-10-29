@@ -18,8 +18,7 @@
   (match e
     [(Lit i) (seq (Mov rax i))]
     [(Prim1 p e) (compile-prim1 p e)]
-    [(IfZero e1 e2 e3)
-     (compile-ifzero e1 e2 e3)]))
+    [(IfZero e1 e2 e3) (compile-ifzero e1 e2 e3)]))
 
 ;; Op1 Expr -> Asm
 (define (compile-prim1 p e)

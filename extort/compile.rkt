@@ -10,10 +10,6 @@
 ;; Expr -> Asm
 (define (compile e)
   (prog (Global 'entry)
-        (Extern 'peek_byte)
-        (Extern 'read_byte)
-        (Extern 'write_byte)
-        (Extern 'raise_error)
         (Label 'entry)
         (Sub rsp 8)
         (compile-e e)
@@ -21,6 +17,7 @@
         (Ret)
         ;; Error handler
         (Label 'err)
+        (Extern 'raise_error)
         (Call 'raise_error)))
 
 ;; Expr -> Asm
@@ -30,10 +27,8 @@
     [(Eof) (seq (Mov rax (value->bits eof)))]
     [(Prim0 p) (compile-prim0 p)]
     [(Prim1 p e) (compile-prim1 p e)]
-    [(If e1 e2 e3)
-     (compile-if e1 e2 e3)]
-    [(Begin e1 e2)
-     (compile-begin e1 e2)]))
+    [(If e1 e2 e3) (compile-if e1 e2 e3)]
+    [(Begin e1 e2) (compile-begin e1 e2)]))
 
 ;; Datum -> Asm
 (define (compile-datum d)

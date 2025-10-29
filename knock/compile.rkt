@@ -19,10 +19,6 @@
   (match p
     [(Prog ds e)
      (prog (Global 'entry)
-           (Extern 'peek_byte)
-           (Extern 'read_byte)
-           (Extern 'write_byte)
-           (Extern 'raise_error)
            (Label 'entry)
            (Push rbx)    ; save callee-saved register
            (Push r15)
@@ -35,6 +31,7 @@
            (compile-defines ds)
            (Label 'err)
            pad-stack
+           (Extern 'raise_error)
            (Call 'raise_error)
            (Data)
            (Label 'empty)
@@ -68,14 +65,10 @@
     [(Prim1 p e) (compile-prim1 p e c)]
     [(Prim2 p e1 e2) (compile-prim2 p e1 e2 c)]
     [(Prim3 p e1 e2 e3) (compile-prim3 p e1 e2 e3 c)]
-    [(If e1 e2 e3)
-     (compile-if e1 e2 e3 c t?)]
-    [(Begin e1 e2)
-     (compile-begin e1 e2 c t?)]
-    [(Let x e1 e2)
-     (compile-let x e1 e2 c t?)]
-    [(App f es)
-     (compile-app f es c t?)]
+    [(If e1 e2 e3) (compile-if e1 e2 e3 c t?)]
+    [(Begin e1 e2) (compile-begin e1 e2 c t?)]
+    [(Let x e1 e2) (compile-let x e1 e2 c t?)]
+    [(App f es) (compile-app f es c t?)]
     [(Match e ps es) (compile-match e ps es c t?)]))
 
 ;; Datum -> Asm
