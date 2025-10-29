@@ -8,8 +8,8 @@
 (define (compile-op0 p)
   (match p
     ['void      (seq (Mov rax (value->bits (void))))]
-    ['read-byte (seq (Call 'read_byte))]
-    ['peek-byte (seq (Call 'peek_byte))]))
+    ['read-byte (seq (Extern 'read_byte) (Call 'read_byte))]
+    ['peek-byte (seq (Extern 'peek_byte) (Call 'peek_byte))]))
 
 ;; Op1 -> Asm
 (define (compile-op1 p)
@@ -37,7 +37,7 @@
      (seq (Cmp rax (value->bits eof))
           if-equal)]
     ['write-byte
-     (seq
+     (seq (Extern 'write_byte)
           (Mov rdi rax)
           (Call 'write_byte))]))
 
