@@ -218,18 +218,12 @@
      (seq (Pop r10)
           (Pop r8)
           (assert-vector r8)
-          (assert-integer r10)
-          (Cmp r10 0)
-          (Jl 'err)
-          (Xor r8 type-vect)       ; r8 = ptr
-          (Mov r9 (Mem r8))        ; r9 = len
-          (Sar r10 int-shift)      ; r10 = index
-          (Sub r9 1)
-          (Cmp r9 r10)
-          (Jl 'err)
-          (Sal r10 3)
-          (Add r8 r10)
-          (Mov (Mem r8 8) rax)
+          (assert-natural r10)
+          (Mov r9 (Mem r8 (- type-vect)))
+          (Cmp r10 r9)
+          (Jge 'err)
+          (Sar r10 1) ; convert to byte offset          
+          (Mov (Mem r8 r10 (- 8 type-vect)) rax)          
           (Mov rax (value->bits (void))))]))
 
 (define (type-pred mask type)
