@@ -50,6 +50,8 @@
   (match d
     [(Defn f xs e)
      (seq (Label (symbol->label f))
+          (Cmp r8 (length xs)) ; arity check
+          (Jne 'err)
           (compile-e e (reverse xs) #t)
           (Add rsp (* 8 (length xs))) ; pop args
           (Ret))]))
@@ -166,6 +168,7 @@
   (seq (compile-es es c)
        (move-args (length es) (length c))
        (Add rsp (* 8 (length c)))
+       (Mov r8 (length es)) ; pass arity info
        (Jmp (symbol->label f))))
 
 ;; Integer Integer -> Asm
@@ -182,6 +185,7 @@
     (seq (Lea rax r)
          (Push rax)
          (compile-es es (cons #f c))
+         (Mov r8 (length es)) ; pass arity info
          (Jmp (symbol->label f))
          (Label r))))
 
