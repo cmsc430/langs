@@ -77,6 +77,8 @@
       [(Lam f xs e)
        (let ((env  (append (reverse fvs) (reverse xs) (list #f))))
          (seq (Label (symbol->label f))
+              (Cmp r8 (length xs))
+              (Jne 'err)
               (Mov rax (Mem rsp (* 8 (length xs))))
               (copy-env-to-stack fvs 8)
               (compile-e e env #t)
@@ -210,6 +212,7 @@
        (Mov rax (Mem rsp (* 8 (length es))))
        (assert-proc rax)
        (Mov rax (Mem rax (- type-proc)))
+       (Mov r8 (length es)) ; pass arity info
        (Jmp rax)))
 
 ;; Integer Integer -> Asm
@@ -233,6 +236,7 @@
          (Mov rax (Mem rsp i))
          (assert-proc rax)
          (Mov rax (Mem rax (- type-proc))) ; fetch the code label
+         (Mov r8 (length es)) ; pass arity info
          (Jmp rax)
          (Label r))))
 
