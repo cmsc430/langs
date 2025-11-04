@@ -35,7 +35,7 @@
   (define (rec ss fs)
     (match ss
       [(list s) fs]
-      [(cons (cons 'define sd) sr)
+      [(cons (cons (? (not-in fs) 'define) sd) sr)
        (match (parse-defn-name sd)
          [f (if (memq f fs)
                 (error "duplicate definition" f)
