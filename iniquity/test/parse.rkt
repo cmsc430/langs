@@ -68,5 +68,7 @@
                       (App 'define (list (Lit 1)))))
   (check-exn exn:fail? (λ () (parse '(define (define x) x)
                                     '(define (g x) x)
-                                    '(define (g 1))))))
+                                    '(define (g 1)))))
+  (check-exn exn:fail? (λ () (parse-closed '(define (f x) 0)
+                                           '(f (g))))))
 

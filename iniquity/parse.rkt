@@ -138,7 +138,7 @@
                 (list ys (cons g gs) (App g es))])])])]
       [(list-rest (? symbol? g) sr)
        (match (parse-es/acc sr fs xs ys gs)
-         [(list ys s es)
+         [(list ys gs es)
           (list ys (if (memq g fs) gs (cons g gs)) (App g es))])]
       [_
        (error "parse error" s)]))
