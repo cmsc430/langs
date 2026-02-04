@@ -1,27 +1,20 @@
-name: Build and test macOS x86_64
-on:
-  push:
-  workflow_dispatch:
+name: macOS
+on: [push, workflow_dispatch]
 
 concurrency:
-  group: mac-ci-${{ github.ref }}
+  group: macos-ci-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   build-and-test:
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         os: [macos-14, macos-15, macos-15-intel, macos-26]
         racket-variant: ['CS']
         racket-version: ['stable']
-        include:
-          - os: macos-13
-            arch: x64
-          - os: macos-14
-            arch: arm64
     runs-on: ${{ matrix.os }}
-    name: Test on ${{ matrix.os }} (${{ matrix.arch }}) Racket ${{ matrix.racket-variant }} ${{ matrix.racket-version }}
+    name: OS ${{ matrix.os }} / Racket ${{ matrix.racket-version }}
 
     steps:
 
@@ -52,7 +45,9 @@ jobs:
         gcc --version
 
     - name: Install langs package
-      run: raco pkg install --auto ../langs/
+      run: |
+        raco pkg install --auto ../langs/
 
     - name: Run tests
-      run: raco test -p langs
+      run: |
+        raco test -p langs

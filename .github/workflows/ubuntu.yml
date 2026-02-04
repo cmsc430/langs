@@ -1,18 +1,26 @@
-on:
-  - push
+name: Ubuntu
+on: [push, workflow_dispatch]
+
+concurrency:
+  group: ubuntu-ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build-and-test:
-    runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: true
       matrix:
         os: [ubuntu-22.04, ubuntu-24.04]
         racket-variant: ['CS']
         racket-version: ['8.6', '8.10', '8.14', '8.18', 'stable', 'current']
-    name: Test on Racket ${{ matrix.racket-variant }} ${{ matrix.racket-version }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    name: OS ${{ matrix.os }} / Racket ${{ matrix.racket-version }}
+
     steps:
+
     - name: Checkout
       uses: actions/checkout@main
+
     - name: Install Racket
       uses: Bogdanp/setup-racket@v1.14
       with:
@@ -20,16 +28,28 @@ jobs:
         distribution: 'full'
         variant: ${{ matrix.racket-variant }}
         version: ${{ matrix.racket-version }}
+
+    - name: Cache Racket packages
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.racket
+          ~/.cache/racket
+        key: racket-${{ matrix.racket-variant }}-${{ matrix.racket-version }}-${{ matrix.os }}
+
     - name: Install clang
       run: |
         sudo apt install -y clang libssl-dev
+
     - name: Version info
       run: |
         clang --version
         gcc --version
+
     - name: Install langs package
       run: |
         raco pkg install --auto ../langs/
+
     - name: Run tests
       run: |
         xvfb-run raco test -p langs
