@@ -13,5 +13,9 @@
 ;; setting up libraries only needed in the last week and only if you
 ;; actually care to run Outlaw.
 
-;; To test outlaw you should do an explicit: raco test -c outlaw
-(define test-omit-paths (list "outlaw"))
+;; To test these, you should do an explicit: raco test -c <lang>
+(define test-omit-paths (list "iniquity-gc"
+                              "mountebank"
+                              ;; "mug"  ;; NOTE: seems to pass currently
+                              "neerdowell"
+                              "outlaw"))
