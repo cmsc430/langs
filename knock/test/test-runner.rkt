@@ -201,6 +201,12 @@
                   '(2 3 4))
     (check-equal? (run '(define (f x y) y)
                        '(f 1 (add1 #f)))
+                  'err)
+    (check-equal? (run '(define (f x y) y)
+                       '(f 1))
+                  'err)
+    (check-equal? (run '(define (f x y) y)
+                       '(f 1 2 3))
                   'err))
 
     (begin ;; Knock

@@ -222,8 +222,8 @@
           (Mov r9 (Mem r8 (- type-vect)))
           (Cmp r10 r9)
           (Jge 'err)
-          (Sar r10 1) ; convert to byte offset          
-          (Mov (Mem r8 r10 (- 8 type-vect)) rax)          
+          (Sar r10 1) ; convert to byte offset
+          (Mov (Mem r8 r10 (- 8 type-vect)) rax)
           (Mov rax (value->bits (void))))]))
 
 (define (type-pred mask type)

@@ -41,7 +41,7 @@
   (define (rec ss fs)
     (match ss
       [(list s) fs]
-      [(cons (cons 'define sd) sr)
+      [(cons (cons (? (not-in fs) 'define) sd) sr)
        (match (parse-defn-name sd)
          [f (if (memq f fs)
                 (error "duplicate definition" f)
@@ -126,14 +126,14 @@
                    (list ys gs (Let x e1 e2))])])]
             [_ (error "let: bad syntax" s)])]
          ['match
-           (match sr
-             [(cons s sr)
-              (match (rec s xs ys gs)
-                [(list ys gs e)
-                 (match (parse-match-clauses/acc sr fs xs ys gs)
-                   [(list ys gs ps es)
-                    (list ys gs (Match e ps es))])])]
-             [_ (error "match: bad syntax" s)])]
+          (match sr
+            [(cons s sr)
+             (match (rec s xs ys gs)
+               [(list ys gs e)
+                (match (parse-match-clauses/acc sr fs xs ys gs)
+                  [(list ys gs ps es)
+                   (list ys gs (Match e ps es))])])]
+            [_ (error "match: bad syntax" s)])]
          [_
           (match (parse-es/acc sr fs xs ys gs)
             [(list ys gs es)
@@ -154,7 +154,7 @@
                 (list ys (cons g gs) (App g es))])])])]
       [(list-rest (? symbol? g) sr)
        (match (parse-es/acc sr fs xs ys gs)
-         [(list ys s es)
+         [(list ys gs es)
           (list ys (if (memq g fs) gs (cons g gs)) (App g es))])]
       [_
        (error "parse error" s)]))
