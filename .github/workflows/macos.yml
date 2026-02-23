@@ -29,20 +29,22 @@ jobs:
         variant: ${{ matrix.racket-variant }}
         version: ${{ matrix.racket-version }}
 
-    - name: Cache Racket packages
-      uses: actions/cache@v4
-      with:
-        path: |
-          ~/.racket
-          ~/.cache/racket
-        key: racket-${{ matrix.racket-variant }}-${{ matrix.racket-version }}-${{ matrix.os }}
-
     - name: Version info
       run: |
         uname -a
         uname -m
         clang --version
         gcc --version
+
+    - name: Cache Racket packages
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.racket
+          ~/.cache/racket
+          ~/.local/share/racket
+          ~/Library/Caches/Racket
+        key: racket-${{ matrix.racket-variant }}-${{ matrix.racket-version }}-${{ matrix.os }}
 
     - name: Install langs package
       run: |
