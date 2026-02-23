@@ -14,4 +14,5 @@
 ;; actually care to run Outlaw.
 
 ;; To test these, you should do an explicit: raco test -c <lang>
-(define test-omit-paths (list "outlaw"))
+(define test-omit-paths (list "iniquity-gc"
+                              "outlaw"))
