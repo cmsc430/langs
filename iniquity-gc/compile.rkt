@@ -13,7 +13,7 @@
 ;; Prog -> Asm
 (define (compile p)
   (match p
-    [(Prog ds e)  
+    [(Prog ds e)
      (prog (externs)
            (Global 'entry)
            (Label 'entry)
@@ -82,7 +82,7 @@
 ;; Id CEnv -> Asm
 (define (compile-variable x c)
   (let ((i (lookup x c)))
-    (seq (Mov rax (Offset rsp i)))))
+    (seq (Mov rax (Mem rsp i)))))
 
 ;; String -> Asm
 (define (compile-string s)
@@ -91,7 +91,7 @@
         (seq (Mov rax type-str))
         (seq (allocate (add1 (quotient (add1 len) 2)))
              (Mov rax len)
-             (Mov (Offset rbx 0) rax)
+             (Mov (Mem rbx 0) rax)
              (compile-string-chars (string->list s) 8)
              (Mov rax rbx)
              (Or rax type-str)
@@ -104,7 +104,7 @@
     ['() (seq)]
     [(cons c cs)
      (seq (Mov rax (char->integer c))
-          (Mov (Offset rbx i) 'eax)
+          (Mov (Mem rbx i) 'eax)
           (compile-string-chars cs (+ 4 i)))]))
 
 ;; Op0 CEnv -> Asm

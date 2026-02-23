@@ -57,22 +57,22 @@
           (Call 'write_byte)
           unpad-stack)]
     ['box
-     (seq (Mov (Offset rbx 0) rax)
+     (seq (Mov (Mem rbx 0) rax)
           (Mov rax rbx)
           (Or rax type-box)
           (Add rbx 8))]
     ['unbox
      (seq (assert-box rax)
           (Xor rax type-box)
-          (Mov rax (Offset rax 0)))]
+          (Mov rax (Mem rax 0)))]
     ['car
      (seq (assert-cons rax)
           (Xor rax type-cons)
-          (Mov rax (Offset rax 8)))]
+          (Mov rax (Mem rax 8)))]
     ['cdr
      (seq (assert-cons rax)
           (Xor rax type-cons)
-          (Mov rax (Offset rax 0)))]
+          (Mov rax (Mem rax 0)))]
     ['empty? (eq-imm '())]
     ['box?
      (type-pred ptr-mask type-box)]
@@ -91,7 +91,7 @@
             (Xor rax type-vect)
             (Cmp rax 0)
             (Je zero)
-            (Mov rax (Offset rax 0))
+            (Mov rax (Mem rax 0))
             (Sal rax int-shift)
             (Jmp done)
             (Label zero)
@@ -104,7 +104,7 @@
             (Xor rax type-str)
             (Cmp rax 0)
             (Je zero)
-            (Mov rax (Offset rax 0))
+            (Mov rax (Mem rax 0))
             (Sal rax int-shift)
             (Jmp done)
             (Label zero)
@@ -162,9 +162,9 @@
                  (Mov rax (value->bits #f))
                  (Label true))))]
     ['cons
-     (seq (Mov (Offset rbx 0) rax)
+     (seq (Mov (Mem rbx 0) rax)
           (Pop rax)
-          (Mov (Offset rbx 8) rax)
+          (Mov (Mem rbx 8) rax)
           (Mov rax rbx)
           (Or rax type-cons)
           (Add rbx 16))]
@@ -184,11 +184,11 @@
             (Or r9 type-vect)
 
             (Sar r8 int-shift)
-            (Mov (Offset rbx 0) r8)
+            (Mov (Mem rbx 0) r8)
             (Add rbx 8)
 
             (Label loop)
-            (Mov (Offset rbx 0) rax)
+            (Mov (Mem rbx 0) rax)
             (Add rbx 8)
             (Sub r8 1)
             (Cmp r8 0)
@@ -210,14 +210,14 @@
           (Cmp rax 0)
           (Jl 'raise_error_align)
           (Xor r8 type-vect)      ; r8 = ptr
-          (Mov r9 (Offset r8 0))  ; r9 = len
+          (Mov r9 (Mem r8 0))  ; r9 = len
           (Sar rax int-shift)     ; rax = index
           (Sub r9 1)
           (Cmp r9 rax)
           (Jl 'raise_error_align)
           (Sal rax 3)
           (Add r8 rax)
-          (Mov rax (Offset r8 8)))]
+          (Mov rax (Mem r8 8)))]
 
     ['make-string
      (let ((loop (gensym))
@@ -233,7 +233,7 @@
             (Or r9 type-str)
 
             (Sar r8 int-shift)
-            (Mov (Offset rbx 0) r8)
+            (Mov (Mem rbx 0) r8)
             (Add rbx 8)
 
             (Sar rax char-shift)
@@ -243,7 +243,7 @@
             (Sal r8 1) ; len is odd
 
             (Label loop)
-            (Mov (Offset rbx 0) eax)
+            (Mov (Mem rbx 0) eax)
             (Add rbx 4)
             (Sub r8 1)
             (Cmp r8 0)
@@ -265,14 +265,14 @@
           (Cmp rax 0)
           (Jl 'raise_error_align)
           (Xor r8 type-str)       ; r8 = ptr
-          (Mov r9 (Offset r8 0))  ; r9 = len
+          (Mov r9 (Mem r8 0))  ; r9 = len
           (Sar rax int-shift)     ; rax = index
           (Sub r9 1)
           (Cmp r9 rax)
           (Jl 'raise_error_align)
           (Sal rax 2)
           (Add r8 rax)
-          (Mov 'eax (Offset r8 8))
+          (Mov 'eax (Mem r8 8))
           (Sal rax char-shift)
           (Or rax type-char))]
 
@@ -286,7 +286,7 @@
             (Cmp r9 type-struct)
             (Jne f)
             (Xor rax type-struct)
-            (Mov rax (Offset rax 0))
+            (Mov rax (Mem rax 0))
             (Cmp r8 rax)
             (Mov rax (value->bits #t))
             (Jne f)
@@ -294,7 +294,7 @@
             (Label f)
             (Mov rax (value->bits #f))
             (Label t)))]
-      
+
     ;; Op3
     ['vector-set!
      (seq (Pop r10)
@@ -304,14 +304,14 @@
           (Cmp r10 0)
           (Jl 'raise_error_align)
           (Xor r8 type-vect)       ; r8 = ptr
-          (Mov r9 (Offset r8 0))   ; r9 = len
+          (Mov r9 (Mem r8 0))   ; r9 = len
           (Sar r10 int-shift)      ; r10 = index
           (Sub r9 1)
           (Cmp r9 r10)
           (Jl 'raise_error_align)
           (Sal r10 3)
           (Add r8 r10)
-          (Mov (Offset r8 8) rax)
+          (Mov (Mem r8 8) rax)
           (Mov rax (value->bits (void))))]
 
     ['struct-ref ; symbol, int, struct
@@ -320,14 +320,14 @@
           (assert-struct rax)
           ;(assert-integer r8)
           (Xor rax type-struct)
-          (Mov r10 (Offset rax 0))
+          (Mov r10 (Mem rax 0))
           (Cmp 'r11 r10)
           (Jne 'raise_error_align)
           (Sar r8 int-shift)
           (Add r8 1)
           (Sal r8 3)
           (Add rax r8)
-          (Mov rax (Offset rax 0)))]))
+          (Mov rax (Mem rax 0)))]))
 
 ;; Nat -> Asm
 ;; Emit instructions for creating a structure of length n
@@ -342,8 +342,8 @@
 ;; Pop elements off stack, writing them to heap
 (define (compile-make-struct/a n i)
   (if (= n i)
-      (seq (Mov (Offset rbx (* 8 (- n i))) rax))
-      (seq (Mov (Offset rbx (* 8 (- n i))) rax)
+      (seq (Mov (Mem rbx (* 8 (- n i))) rax))
+      (seq (Mov (Mem rbx (* 8 (- n i))) rax)
            (Pop rax)
            (compile-make-struct/a n (add1 i)))))
 
@@ -352,7 +352,7 @@
 (define char-array-copy
   (seq (Mov rdi rbx)            ; dst
        (Mov rsi rax)            ; src
-       (Mov rdx (Offset rax 0)) ; len
+       (Mov rdx (Mem rax 0)) ; len
        (Add rdx 1)              ; #words = 1 + (len+1)/2
        (Sar rdx 1)
        (Add rdx 1)
@@ -363,7 +363,7 @@
        unpad-stack
        ; rbx should be preserved by memcpy
        ;(Mov rbx rax) ; dst is returned, install as heap pointer
-       (Add rbx r12)))                   
+       (Add rbx r12)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

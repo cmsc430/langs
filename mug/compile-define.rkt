@@ -46,7 +46,7 @@
     [(cons (Defn f xs e) ds)
      (let ((fvs (fv (Lam f xs e))))
        (seq (Lea rax (symbol->label f))
-            (Mov (Offset rbx off) rax)
+            (Mov (Mem rbx off) rax)
             (Mov rax rbx)
             (Add rax off)
             (Or rax type-proc)
