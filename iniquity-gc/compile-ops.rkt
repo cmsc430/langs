@@ -79,22 +79,22 @@
      (seq (Push rax)
           (allocate 1)
           (Pop rax)
-          (Mov (Offset rbx 0) rax)
+          (Mov (Mem rbx 0) rax)
           (Mov rax rbx)
           (Or rax type-box)
           (Add rbx 8))]
     ['unbox
      (seq (assert-box rax)
           (Xor rax type-box)
-          (Mov rax (Offset rax 0)))]
+          (Mov rax (Mem rax 0)))]
     ['car
      (seq (assert-cons rax)
           (Xor rax type-cons)
-          (Mov rax (Offset rax 8)))]
+          (Mov rax (Mem rax 8)))]
     ['cdr
      (seq (assert-cons rax)
           (Xor rax type-cons)
-          (Mov rax (Offset rax 0)))]
+          (Mov rax (Mem rax 0)))]
     ['empty? (eq-imm '())]
     ['box?
      (type-pred ptr-mask type-box)]
@@ -111,7 +111,7 @@
             (Xor rax type-vect)
             (Cmp rax 0)
             (Je zero)
-            (Mov rax (Offset rax 0))
+            (Mov rax (Mem rax 0))
             (Sal rax int-shift)
             (Jmp done)
             (Label zero)
@@ -124,7 +124,7 @@
             (Xor rax type-str)
             (Cmp rax 0)
             (Je zero)
-            (Mov rax (Offset rax 0))
+            (Mov rax (Mem rax 0))
             (Sal rax int-shift)
             (Jmp done)
             (Label zero)
@@ -181,9 +181,9 @@
      (seq (Push rax)
           (allocate 2)
           (Pop rax)
-          (Mov (Offset rbx 0) rax)
+          (Mov (Mem rbx 0) rax)
           (Pop rax)
-          (Mov (Offset rbx 8) rax)
+          (Mov (Mem rbx 8) rax)
           (Mov rax rbx)
           (Or rax type-cons)
           (Add rbx 16))]
@@ -212,11 +212,11 @@
             (Or r9 type-vect)
 
             (Sar r8 int-shift)
-            (Mov (Offset rbx 0) r8)
+            (Mov (Mem rbx 0) r8)
             (Add rbx 8)
 
             (Label loop)
-            (Mov (Offset rbx 0) rax)
+            (Mov (Mem rbx 0) rax)
             (Add rbx 8)
             (Sub r8 1)
             (Cmp r8 0)
@@ -235,14 +235,14 @@
           (Cmp rax 0)
           (Jl 'raise_error_align)
           (Xor r8 type-vect)      ; r8 = ptr
-          (Mov r9 (Offset r8 0))  ; r9 = len
+          (Mov r9 (Mem r8 0))  ; r9 = len
           (Sar rax int-shift)     ; rax = index
           (Sub r9 1)
           (Cmp r9 rax)
           (Jl 'raise_error_align)
           (Sal rax 3)
           (Add r8 rax)
-          (Mov rax (Offset r8 8)))]
+          (Mov rax (Mem r8 8)))]
 
     ['make-string
      (let ((loop (gensym))
@@ -269,7 +269,7 @@
             (Or r9 type-str)
 
             (Sar r8 int-shift)
-            (Mov (Offset rbx 0) r8)
+            (Mov (Mem rbx 0) r8)
             (Add rbx 8)
 
             (Sar rax char-shift)
@@ -279,7 +279,7 @@
             (Sal r8 1) ; len is odd
 
             (Label loop)
-            (Mov (Offset rbx 0) eax)
+            (Mov (Mem rbx 0) eax)
             (Add rbx 4)
             (Sub r8 1)
             (Cmp r8 0)
@@ -300,14 +300,14 @@
           (Cmp rax 0)
           (Jl 'raise_error_align)
           (Xor r8 type-str)       ; r8 = ptr
-          (Mov r9 (Offset r8 0))  ; r9 = len
+          (Mov r9 (Mem r8 0))  ; r9 = len
           (Sar rax int-shift)     ; rax = index
           (Sub r9 1)
           (Cmp r9 rax)
           (Jl 'raise_error_align)
           (Sal rax 2)
           (Add r8 rax)
-          (Mov 'eax (Offset r8 8))
+          (Mov 'eax (Mem r8 8))
           (Sal rax char-shift)
           (Or rax type-char))]
 
@@ -315,7 +315,7 @@
      (seq (Pop r8)
           (assert-box r8)
           (Xor r8 type-box)
-          (Mov (Offset r8 0) rax)
+          (Mov (Mem r8 0) rax)
           (Mov rax (value->bits (void))))]))
 
 ;; Op3 -> Asm
@@ -329,14 +329,14 @@
           (Cmp r10 0)
           (Jl 'raise_error_align)
           (Xor r8 type-vect)       ; r8 = ptr
-          (Mov r9 (Offset r8 0))   ; r9 = len
+          (Mov r9 (Mem r8 0))   ; r9 = len
           (Sar r10 int-shift)      ; r10 = index
           (Sub r9 1)
           (Cmp r9 r10)
           (Jl 'raise_error_align)
           (Sal r10 3)
           (Add r8 r10)
-          (Mov (Offset r8 8) rax)
+          (Mov (Mem r8 8) rax)
           (Mov rax (value->bits (void))))]))
 
 

@@ -16,10 +16,10 @@
     [else          (compile-atom d)]))
 
 (define (load-symbol s)
-  (Plus (symbol->data-label s) type-symb))
+  (Mem (symbol->data-label s) type-symb))
 
 (define (load-string s)
-  (Plus (symbol->data-label (string->symbol s)) type-str))
+  (Mem (symbol->data-label (string->symbol s)) type-str))
 
 ;; Value -> Asm
 (define (compile-atom v)
@@ -55,7 +55,7 @@
   (match (compile-quoted c)
     [(cons l1 is1)
      (let ((l (gensym 'box)))
-       (cons (Plus l type-box)
+       (cons (Mem l type-box)
              (seq (Label l)
                   (Dq l1)
                   is1)))]))
@@ -67,7 +67,7 @@
      (match (compile-quoted c2)
        [(cons l2 is2)
         (let ((l (gensym 'cons)))
-          (cons (Plus l type-cons)
+          (cons (Mem l type-cons)
                 (seq (Label l)
                      (Dq l2)
                      (Dq l1)
@@ -81,7 +81,7 @@
     [_
      (let ((l (gensym 'vector))
            (cds (map compile-quoted ds)))
-       (cons (Plus l type-vect)
+       (cons (Mem l type-vect)
              (seq (Label l)
                   (Dq (length ds))
                   (map (λ (cd) (Dq (car cd))) cds)
