@@ -15,6 +15,7 @@
 (define rsp 'rsp) ; stack
 (define rdi 'rdi) ; arg
 (define r15 'r15) ; stack pad (non-volatile)
+(define r12 'r12)
 
 ;; type CEnv = (Listof [Maybe Id])
 
@@ -27,12 +28,14 @@
            (Label 'entry)
            (Push rbx)    ; save callee-saved register
            (Push r15)
+           (Push r12)
            (Mov rbx rdi) ; recv heap pointer
            (init-symbol-table p)
            (compile-defines-values ds)
            (compile-e e (reverse (define-ids ds)) #f)
            (Add rsp (* 8 (length ds))) ;; pop function definitions
-           (Pop r15)     ; restore callee-save register
+           (Pop r12)     ; restore callee-save register
+           (Pop r15)
            (Pop rbx)
            (Ret)
            (compile-defines ds)
