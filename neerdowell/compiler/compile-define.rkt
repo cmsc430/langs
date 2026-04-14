@@ -1,8 +1,8 @@
 #lang racket
 (provide compile-define compile-defines-values define-ids compile-defines)
-(require "ast.rkt"
-         "types.rkt"
-         "fv.rkt"
+(require "../syntax/ast.rkt"
+         "../syntax/fv.rkt"
+         "../runtime/types.rkt"
          "utils.rkt"
          "compile-expr.rkt"
          a86/ast)

@@ -1,6 +1,6 @@
 #lang racket
 (provide interp interp-env)
-(require "ast.rkt"
+(require "../syntax/ast.rkt"
          "env.rkt"
          "interp-prims.rkt")
 

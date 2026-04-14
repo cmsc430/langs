@@ -1,8 +1,8 @@
 #lang racket
 (require "test-runner.rkt"
-         "../parse.rkt"
-         "../interp-defun.rkt"
-         "../interp-io.rkt")
+         "../syntax/parse.rkt"
+         "../interpreter/interp-defun.rkt"
+         "../interpreter/interp-io.rkt")
 
 (define (closure->proc xs e r)
   ;; Could make this better by calling the interpreter,

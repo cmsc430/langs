@@ -29,14 +29,25 @@ jobs:
         variant: ${{ matrix.racket-variant }}
         version: ${{ matrix.racket-version }}
 
-    - name: Install clang
+    - name: Install LLVM
+      uses: ZhongRuoyu/setup-llvm@v0
+      with:
+        llvm-version: 22
+
+    - name: Install libssl
       run: |
-        sudo apt install -y clang libssl-dev
+        sudo apt install -y libssl-dev
 
     - name: Version info
       run: |
         clang --version
         gcc --version
+
+    # Temporary: install the next branch of a86 while this is in development
+    # Once merged in main, remove this and let it grab main branch by default
+    - name: Install a86 next branch
+      run: |
+        raco pkg install --auto 'https://github.com/cmsc430/a86.git?#next'
 
     - name: Install langs package
       run: |

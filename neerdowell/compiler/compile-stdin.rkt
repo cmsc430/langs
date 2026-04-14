@@ -1,6 +1,9 @@
 #lang racket
 (provide main)
-(require "parse.rkt" "compile.rkt" "read-all.rkt" a86/printer)
+(require "../syntax/parse.rkt"
+         "../syntax/read-all.rkt"
+         "compile.rkt"
+         a86/printer)
 
 ;; -> Void
 ;; Compile contents of stdin,

@@ -1,5 +1,5 @@
 #lang racket
-(require "ast.rkt")
+(require "../syntax/ast.rkt")
 (provide interp-prim StructVal)
 
 ;; type Struct = (StructVal Symbol (Vectorof Value))

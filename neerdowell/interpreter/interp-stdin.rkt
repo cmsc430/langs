@@ -1,6 +1,8 @@
 #lang racket
 (provide main)
-(require "parse.rkt" "interp.rkt" "read-all.rkt")
+(require "../syntax/parse.rkt"
+         "../syntax/read-all.rkt"
+         "interp.rkt")
 
 ;; -> Void
 ;; Parse and interpret contents of stdin,

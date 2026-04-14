@@ -1,9 +1,9 @@
 #lang racket
 (provide compile compile-e)
-(require "ast.rkt"
-         "types.rkt"
-         "lambdas.rkt"
-         "fv.rkt"
+(require "../syntax/ast.rkt"
+         "../syntax/lambdas.rkt"
+         "../syntax/fv.rkt"
+         "../runtime/types.rkt"
          "utils.rkt"
          "compile-define.rkt"
          "compile-expr.rkt"

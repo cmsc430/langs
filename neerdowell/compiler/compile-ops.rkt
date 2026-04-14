@@ -2,7 +2,10 @@
 (provide compile-op pad-stack unpad-stack assert-proc compile-make-struct
          ; for notes
          assert-cons)
-(require "ast.rkt" "types.rkt" "utils.rkt" a86/ast)
+(require "../syntax/ast.rkt"
+         "../runtime/types.rkt"
+         "utils.rkt"
+         a86/ast)
 
 (define rax 'rax) ; return
 (define eax 'eax) ; 32-bit load/store
