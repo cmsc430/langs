@@ -1,13 +1,14 @@
 #lang racket
 (provide check-compiler)
 (require rackunit)
-(require "interp.rkt")
-(require "exec.rkt")
+(require "interpreter/interp.rkt")
+(require "executor/run.rkt")
+(require "compiler/compile.rkt")
 
 ;; Expr -> Void
 (define (check-compiler e)
   (let ((r (with-handlers ([exn:fail? identity])
              (interp e))))
     (unless (exn? r)
-      (check-equal? r (exec e)))))
+      (check-equal? r (run (compile e))))))
 

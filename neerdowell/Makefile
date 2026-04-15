@@ -1,14 +1,14 @@
 ifeq ($(shell uname), Darwin)
-  LANGS_CC ?= arch -x86_64 clang
+  LANGS_CC ?= arch -x86_64 clang -### -fuse-ld=lld
   LANGS_AS ?= arch -x86_64 clang -c
 else
-  LANGS_CC ?= clang
+  LANGS_CC ?= clang -fuse-ld=lld
   LANGS_AS ?= clang -c
 endif
 
 RACKET ?= racket
 
-RUNTIME_DIR := runtime/standalone
+RUNTIME_DIR := runtime
 RUNTIME := $(RUNTIME_DIR)/runtime.o
 
 # Example source extension for this language.

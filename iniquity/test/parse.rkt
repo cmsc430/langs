@@ -1,6 +1,6 @@
 #lang racket
-(require "../parse.rkt")
-(require "../ast.rkt")
+(require "../syntax/parse.rkt")
+(require "../syntax/ast.rkt")
 (require rackunit)
 
 (define (p e)
@@ -47,7 +47,7 @@
   (check-equal? (parse "asdf") (p (Lit "asdf")))
   (check-equal? (parse '(make-string 10 #\a))
                 (p (Prim2 'make-string (Lit 10) (Lit #\a)))))
-  
+
 (begin ; Iniquity
   (check-equal? (parse '(define (f x) x) 1)
                 (Prog (list (Defn 'f '(x) (Var 'x))) (Lit 1)))
@@ -55,10 +55,20 @@
                 (Prog (list (Defn 'define '() (Lit 0)))
                       (App 'define '())))
   (check-exn exn:fail? (λ () (parse '(define (f y y) y) 1)))
+  (check-exn exn:fail? (λ () (parse '(define (f y) y) '(define (f x) x) 1)))
   (check-equal? (parse-closed '(define (f x) (g x))
                               '(define (g x) (f x))
                               '(f 0))
                 (Prog (list (Defn 'f '(x) (App 'g (list (Var 'x))))
                             (Defn 'g '(x) (App 'f (list (Var 'x)))))
-                      (App 'f (list (Lit 0))))))
+                      (App 'f (list (Lit 0)))))
+  (check-equal? (parse '(define (define x) x)
+                       '(define 1))
+                (Prog (list (Defn 'define '(x) (Var 'x)))
+                      (App 'define (list (Lit 1)))))
+  (check-exn exn:fail? (λ () (parse '(define (define x) x)
+                                    '(define (g x) x)
+                                    '(define (g 1)))))
+  (check-exn exn:fail? (λ () (parse-closed '(define (f x) 0)
+                                           '(f (g))))))
 

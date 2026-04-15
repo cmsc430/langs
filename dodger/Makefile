@@ -8,8 +8,7 @@ endif
 
 objs = \
 	main.o \
-	print.o \
-	values.o
+	print.o
 
 default: runtime.o
 

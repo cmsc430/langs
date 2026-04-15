@@ -1,6 +1,6 @@
 #lang racket
-(require "../parse.rkt")
-(require "../ast.rkt")
+(require "../syntax/parse.rkt")
+(require "../syntax/ast.rkt")
 (require rackunit)
 
 (define (p e)
@@ -47,6 +47,7 @@
   (check-equal? (parse "asdf") (p (Lit "asdf")))
   (check-equal? (parse '(make-string 10 #\a))
                 (p (Prim2 'make-string (Lit 10) (Lit #\a)))))
+
 (begin ; Iniquity
   (check-equal? (parse '(define (f x) x) 1)
                 (Prog (list (Defn 'f '(x) (Var 'x))) (Lit 1)))

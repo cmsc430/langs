@@ -1,6 +1,6 @@
 #lang racket
-(require "../parse.rkt")
-(require "../ast.rkt")
+(require "../syntax/parse.rkt")
+(require "../syntax/ast.rkt")
 (require rackunit)
 
 (define (p e)

@@ -1,8 +1,8 @@
 #lang racket
-(require "../compile.rkt")
-(require "../parse.rkt")
-(require "../exec.rkt")
+(require "../compiler/compile.rkt")
+(require "../syntax/parse.rkt")
+(require "../executor/run.rkt")
 (require "test-runner.rkt")
 
-(test (λ (e) (exec (parse e))))
+(test (λ (e) (run (compile (parse e)))))
 

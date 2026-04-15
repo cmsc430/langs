@@ -1,8 +1,8 @@
 #lang racket
 (require "test-runner.rkt")
-(require "../parse.rkt")
-(require "../interp-heap.rkt")
-(require "../interp-io.rkt")
+(require "../syntax/parse.rkt")
+(require "../interpreter/interp-heap.rkt")
+(require "../interpreter/interp-io.rkt")
 
 (test (λ (e) (interp (parse e))))
 
