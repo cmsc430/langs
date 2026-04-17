@@ -34,9 +34,7 @@
 ;; Expr -> [Listof (U Symbol String)]
 (define (literals-e e)
   (match e
-    [(Lit (? symbol? s)) (list s)]
-    [(Lit (? string? s)) (list s)]
-    [(Lit _) '()]
+    [(Lit d) (literals-datum d)]
     [(Prim1 p e)
      (literals-e e)]
     [(Prim2 p e1 e2)
@@ -57,6 +55,13 @@
      (append (literals-e e) (append-map literals-match-clause ps es))]
     [_ '()]))
 
+;; Datum -> [Listof (U Symbol String)]
+(define (literals-datum d)
+  (cond
+    [(string? d) (list d)]
+    [(symbol? d) (list d)]
+    [else '()]))
+
 ;; Pat Expr -> [Listof (U Symbol String)]
 (define (literals-match-clause p e)
   (append (literals-pat p) (literals-e e)))
@@ -64,8 +69,7 @@
 ;; Pat -> [Listof (U Symbol String)]
 (define (literals-pat p)
   (match p
-    [(Lit (? symbol? s)) (list s)]
-    [(Lit (? string? s)) (list s)]
+    [(Lit d) (literals-datum d)]
     [(Box p) (literals-pat p)]
     [(Cons p1 p2) (append (literals-pat p1) (literals-pat p2))]    
     [(Conj p1 p2) (append (literals-pat p1) (literals-pat p2))]
