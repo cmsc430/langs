@@ -1,6 +1,6 @@
 #lang racket
 (provide (all-defined-out))
-(require "../parse.rkt")
+(require "parse.rkt")
 
 ;; Randomly generate an expression
 (define (random-expr)
