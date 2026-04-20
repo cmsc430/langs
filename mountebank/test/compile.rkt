@@ -1,8 +1,8 @@
 #lang racket
-(require "test-runner.rkt"
-         "../parse.rkt"
-         "../compile.rkt"
-         "../run.rkt")
+(require "../compiler/compile.rkt")
+(require "../syntax/parse.rkt")
+(require "../executor/run.rkt")
+(require "test-runner.rkt")
+(test (λ p (run (compile (apply parse-closed p)))))
+(test/io (λ (in . p) (run/io (compile (apply parse-closed p)) in)))
 
-(test-runner    (λ p (run (compile (parse p)))))
-(test-runner-io (λ (s . p) (run/io (compile (parse p)) s)))
