@@ -24,6 +24,7 @@
           (extern 'raise_error
                   (λ () (raise 'err)) 
                   (_fun -> _void)))])
+     (reset-jit!) ; diagnostic
      (asm-load prog))
    heap))
 
