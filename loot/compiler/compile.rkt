@@ -25,6 +25,7 @@
            (Push rbx)    ; save callee-saved register
            (Push r15)
            (Mov rbx rdi) ; recv heap pointer
+
            (compile-defines-values ds)
            (compile-e e (reverse (define-ids ds)) #f)
            (Add rsp (* 8 (length ds))) ;; pop function definitions
