@@ -80,3 +80,10 @@
   (check-equal? (parse '(f x))
                 (p (App (Var 'f) (list (Var 'x))))))
 
+(begin ; Mug
+  (check-equal? (parse ''x)
+                (p (Lit 'x)))
+  (check-equal? (parse '(let ((quote 1))
+                          'x))
+                (p (Let 'quote (Lit 1) (App (Var 'quote) (list (Var 'x)))))))
+

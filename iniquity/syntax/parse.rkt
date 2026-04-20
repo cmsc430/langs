@@ -101,7 +101,7 @@
        (list ys gs (Eof))]
       [(? datum?)
        (list ys gs (Lit s))]
-      [(list 'quote (list))
+      [(list (and 'quote (? (not-in ns))) (list))
        (list ys gs (Lit '()))]
       [(? symbol? (? (not-in fs)))
        (if (memq s xs)

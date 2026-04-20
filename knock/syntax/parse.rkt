@@ -108,7 +108,7 @@
        (list ys gs (Eof))]
       [(? datum?)
        (list ys gs (Lit s))]
-      [(list 'quote (list))
+      [(list (and 'quote (? (not-in ns))) (list))
        (list ys gs (Lit '()))]
       [(? symbol? (? (not-in fs)))
        (if (memq s xs)
@@ -207,11 +207,13 @@
 (define (parse-match-pattern/acc s fs xs ys gs)
   (define (rec p xs ys gs)
     (match p
-      [(? datum?)  (list ys xs gs (Lit p))]
+      [(? self-quoting-datum?)  (list ys xs gs (Lit p))]
       ['_          (list ys xs gs (Var '_))]
       [(? symbol?) (list ys (cons p xs) gs (Var p))]
       [(list 'quote '())
        (list ys xs gs (Lit '()))]
+      [(list 'quote (? datum? d))
+       (list ys xs (Lit d))]
       [(list 'box s)
        (match (rec s xs ys gs)
          [(list ys xs gs p)

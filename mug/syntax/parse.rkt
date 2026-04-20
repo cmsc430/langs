@@ -200,13 +200,15 @@
 (define (parse-match-pattern/acc s xs ys)
   (define (rec p xs ys)
     (match p
-      [(? datum?)  (list ys xs (Lit p))]
+      [(? self-quoting-datum?)  (list ys xs (Lit p))]
       ['_          (list ys xs (Var '_))]
       [(? symbol?) (list ys (cons p xs) (Var p))]
       [(list 'quote '())
        (list ys xs (Lit '()))]
       [(list 'quote (? symbol? s))
        (list ys xs (Lit s))]
+      [(list 'quote (? datum? d))
+       (list ys xs (Lit d))]
       [(list 'box s)
        (match (rec s xs ys)
          [(list ys xs p)
