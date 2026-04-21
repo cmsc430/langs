@@ -29,6 +29,11 @@ jobs:
         variant: ${{ matrix.racket-variant }}
         version: ${{ matrix.racket-version }}
 
+    - name: Install LLVM
+      uses: ZhongRuoyu/setup-llvm@v0
+      with:
+        llvm-version: 22
+
     - name: Version info
       run: |
         uname -a
