@@ -63,7 +63,6 @@
           (extern 'symb_cmp
                   symb-cmp/cb
                   (_fun _pointer _pointer -> _int)))])
-     (reset-jit!) ; diagnostic
      (asm-load prog))
    heap))
 
