@@ -45,8 +45,8 @@ jobs:
 
     - name: Install a86 branch
       run: |
-        git clone --branch "${{ github.ref_name }}" --single-branch https://github.com/cmsc430/a86.git
-        raco pkg install --auto --no-docs a86/
+        git clone --branch "${{ github.ref_name }}" --single-branch https://github.com/cmsc430/a86.git ../a86
+        raco pkg install --auto --no-docs ../a86/
 
     - name: Install langs package
       run: |
