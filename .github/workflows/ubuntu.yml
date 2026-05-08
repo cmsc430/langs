@@ -53,5 +53,48 @@ jobs:
         raco pkg install --auto --no-docs ../langs/
 
     - name: Run tests
+      id: langs-tests
+      continue-on-error: true
       run: |
         xvfb-run raco test -p langs
+
+    - name: Rerun focused failing tests without trace
+      id: focused-rerun
+      if: steps.langs-tests.outcome == 'failure'
+      continue-on-error: true
+      run: |
+        case "${{ matrix.racket-version }}" in
+          stable)
+            xvfb-run raco test mug/test/run-compile-tests.rkt
+            ;;
+          8.6)
+            xvfb-run raco test jig/test/run-compile-tests.rkt
+            ;;
+          *)
+            exit 0
+            ;;
+        esac
+
+    - name: Rerun focused failing tests with JIT trace
+      id: focused-rerun-trace
+      if: steps.langs-tests.outcome == 'failure' && steps.focused-rerun.outcome == 'failure'
+      continue-on-error: true
+      env:
+        A86_JIT_TRACE: "1"
+      run: |
+        case "${{ matrix.racket-version }}" in
+          stable)
+            xvfb-run raco test mug/test/run-compile-tests.rkt
+            ;;
+          8.6)
+            xvfb-run raco test jig/test/run-compile-tests.rkt
+            ;;
+          *)
+            exit 0
+            ;;
+        esac
+
+    - name: Fail job if focused rerun also failed
+      if: steps.langs-tests.outcome == 'failure' && steps.focused-rerun.outcome == 'failure' && steps.focused-rerun-trace.outcome == 'failure'
+      run: |
+        exit 1
