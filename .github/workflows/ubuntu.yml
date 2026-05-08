@@ -98,3 +98,132 @@ jobs:
       if: steps.langs-tests.outcome == 'failure' && steps.focused-rerun.outcome == 'failure' && steps.focused-rerun-trace.outcome == 'failure'
       run: |
         exit 1
+
+  debug-mug-prefix:
+    runs-on: ubuntu-22.04
+    name: Debug prefix / Racket stable / mug
+
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@main
+
+    - name: Install Racket
+      uses: Bogdanp/setup-racket@v1.15
+      with:
+        architecture: 'x64'
+        distribution: 'full'
+        variant: 'CS'
+        version: 'stable'
+
+    - name: Install LLVM
+      uses: ZhongRuoyu/setup-llvm@v0
+      with:
+        llvm-version: 22
+
+    - name: Install libssl
+      run: |
+        sudo apt install -y libssl-dev
+
+    - name: Install a86 branch
+      run: |
+        git clone --branch "${{ github.ref_name }}" --single-branch https://github.com/cmsc430/a86.git ../a86
+        raco pkg install --auto --no-docs ../a86/
+
+    - name: Install langs package
+      run: |
+        raco pkg install --auto --no-docs ../langs/
+
+    - name: Run prefix before mug
+      run: |
+        xvfb-run raco test \
+          abscond \
+          blackmail \
+          con \
+          dodger \
+          dupe \
+          evildoer \
+          extort \
+          fraud \
+          hoax \
+          hustle \
+          iniquity \
+          jig \
+          knock \
+          loot
+
+    - name: Run mug define tests
+      id: mug-define
+      continue-on-error: true
+      run: |
+        xvfb-run raco test mug/test/define-tests.rkt
+
+    - name: Rerun mug define tests with JIT trace
+      if: steps.mug-define.outcome == 'failure'
+      env:
+        A86_JIT_TRACE: "1"
+      run: |
+        xvfb-run raco test mug/test/define-tests.rkt
+
+  debug-jig-prefix:
+    runs-on: ubuntu-22.04
+    name: Debug prefix / Racket 8.6 / jig
+
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@main
+
+    - name: Install Racket
+      uses: Bogdanp/setup-racket@v1.15
+      with:
+        architecture: 'x64'
+        distribution: 'full'
+        variant: 'CS'
+        version: '8.6'
+
+    - name: Install LLVM
+      uses: ZhongRuoyu/setup-llvm@v0
+      with:
+        llvm-version: 22
+
+    - name: Install libssl
+      run: |
+        sudo apt install -y libssl-dev
+
+    - name: Install a86 branch
+      run: |
+        git clone --branch "${{ github.ref_name }}" --single-branch https://github.com/cmsc430/a86.git ../a86
+        raco pkg install --auto --no-docs ../a86/
+
+    - name: Install langs package
+      run: |
+        raco pkg install --auto --no-docs ../langs/
+
+    - name: Run prefix before jig
+      run: |
+        xvfb-run raco test \
+          abscond \
+          blackmail \
+          con \
+          dodger \
+          dupe \
+          evildoer \
+          extort \
+          fraud \
+          hoax \
+          hustle \
+          iniquity
+
+    - name: Run jig define tests
+      id: jig-define
+      continue-on-error: true
+      run: |
+        xvfb-run raco test jig/test/define-tests.rkt
+
+    - name: Rerun jig define tests with JIT trace
+      if: steps.jig-define.outcome == 'failure'
+      env:
+        A86_JIT_TRACE: "1"
+      run: |
+        xvfb-run raco test jig/test/define-tests.rkt
