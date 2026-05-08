@@ -99,9 +99,9 @@ jobs:
       run: |
         exit 1
 
-  debug-mountebank-prefix:
+  debug-stable-file-prefix:
     runs-on: ubuntu-22.04
-    name: Debug prefix / Racket stable / mountebank
+    name: Debug exact file prefix / Racket stable
 
     steps:
 
@@ -134,36 +134,20 @@ jobs:
       run: |
         raco pkg install --auto --no-docs ../langs/
 
-    - name: Run prefix before mountebank
-      run: |
-        xvfb-run raco test \
-          abscond \
-          blackmail \
-          con \
-          dodger \
-          dupe \
-          evildoer \
-          extort \
-          fraud \
-          hoax \
-          hustle \
-          iniquity \
-          jig \
-          knock \
-          loot
-
-    - name: Run mountebank compile tests
-      id: mountebank-compile
+    - name: Run exact stable file prefix
+      id: stable-prefix
       continue-on-error: true
       run: |
-        xvfb-run raco test mountebank/test/run-compile-tests.rkt
+        mapfile -t files < .github/stable-prefix-files.txt
+        xvfb-run raco test "${files[@]}"
 
-    - name: Rerun mountebank compile tests with JIT trace
-      if: steps.mountebank-compile.outcome == 'failure'
+    - name: Rerun exact stable file prefix with JIT trace
+      if: steps.stable-prefix.outcome == 'failure'
       env:
         A86_JIT_TRACE: "1"
       run: |
-        xvfb-run raco test mountebank/test/run-compile-tests.rkt
+        mapfile -t files < .github/stable-prefix-files.txt
+        xvfb-run raco test "${files[@]}"
 
   debug-jig-prefix:
     runs-on: ubuntu-22.04
