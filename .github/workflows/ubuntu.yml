@@ -141,8 +141,18 @@ jobs:
         mapfile -t files < .github/stable-prefix-files.txt
         xvfb-run raco test "${files[@]}"
 
-    - name: Rerun exact stable file prefix with JIT trace
+    - name: Rerun exact stable file prefix without trace
+      id: stable-prefix-rerun
       if: steps.stable-prefix.outcome == 'failure'
+      continue-on-error: true
+      run: |
+        mapfile -t files < .github/stable-prefix-files.txt
+        xvfb-run raco test "${files[@]}"
+
+    - name: Rerun exact stable file prefix with JIT trace
+      id: stable-prefix-rerun-trace
+      if: steps.stable-prefix.outcome == 'failure' && steps.stable-prefix-rerun.outcome == 'failure'
+      continue-on-error: true
       env:
         A86_JIT_TRACE: "1"
       run: |
