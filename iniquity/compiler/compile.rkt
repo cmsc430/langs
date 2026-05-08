@@ -20,11 +20,9 @@
            (Label 'entry)
            (Push rbx)    ; save callee-saved register
            (Push r15)
-           (Push r12)
            (Mov rbx rdi) ; recv heap pointer
 
            (compile-e e '())
-           (Pop r12)     ; restore callee-save register
            (Pop r15)     ; restore callee-save register
            (Pop rbx)
            (Ret)
@@ -183,3 +181,4 @@
      (match (eq? x y)
        [#t 0]
        [#f (+ 8 (lookup x rest))])]))
+

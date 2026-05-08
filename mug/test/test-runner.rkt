@@ -93,7 +93,7 @@
     (check-equal? (run '(= (add1 4) 5)) #t)
     (check-equal? (run '(< 5 5)) #f)
     (check-equal? (run '(< 4 5)) #t)
-    (check-equal? (run '(< (add1 4) 5)) #f))            
+    (check-equal? (run '(< (add1 4) 5)) #f))
 
   (begin ;; Hustle
     (check-equal? (run '(empty? (cons 1 2))) #f)

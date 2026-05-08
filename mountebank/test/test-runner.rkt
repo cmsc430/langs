@@ -93,7 +93,7 @@
     (check-equal? (run '(= (add1 4) 5)) #t)
     (check-equal? (run '(< 5 5)) #f)
     (check-equal? (run '(< 4 5)) #t)
-    (check-equal? (run '(< (add1 4) 5)) #f))            
+    (check-equal? (run '(< (add1 4) 5)) #f))
 
   (begin ;; Hustle
     (check-equal? (run '(empty? (cons 1 2))) #f)
@@ -339,7 +339,7 @@
     (check-equal? (run ''(1 . 2))
                   '(1 . 2))
     (check-equal? (run ''(("1") (#() #(1 #(2))) (#&(1)) (#f) (4) (5)))
-                  '(("1") (#() #(1 #(2))) (#&(1)) (#f) (4) (5)))  
+                  '(("1") (#() #(1 #(2))) (#&(1)) (#f) (4) (5)))
     (check-equal? (run '(define (f) (cons 1 2))
                        '(eq? (f) (f)))
                   #f)

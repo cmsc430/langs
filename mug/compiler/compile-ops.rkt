@@ -294,6 +294,5 @@
        (Call 'memcpy)
        unpad-stack
        ; rbx should be preserved by memcpy
-       ;(Mov rbx rax) ; dst is returned, install as heap pointer
        (Add rbx r12)))
 
