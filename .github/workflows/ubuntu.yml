@@ -43,15 +43,14 @@ jobs:
         clang --version
         gcc --version
 
-    # Temporary: install the next branch of a86 while this is in development
-    # Once merged in main, remove this and let it grab main branch by default
-    - name: Install a86 next branch
+    - name: Install a86 branch
       run: |
-        raco pkg install --auto 'https://github.com/cmsc430/a86.git?#next'
+        git clone --branch "${{ github.ref_name }}" --single-branch https://github.com/cmsc430/a86.git
+        raco pkg install --auto --no-docs a86/
 
     - name: Install langs package
       run: |
-        raco pkg install --auto ../langs/
+        raco pkg install --auto --no-docs ../langs/
 
     - name: Run tests
       run: |
