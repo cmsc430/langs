@@ -99,9 +99,9 @@ jobs:
       run: |
         exit 1
 
-  debug-mug-prefix:
+  debug-mountebank-prefix:
     runs-on: ubuntu-22.04
-    name: Debug prefix / Racket stable / mug
+    name: Debug prefix / Racket stable / mountebank
 
     steps:
 
@@ -134,7 +134,7 @@ jobs:
       run: |
         raco pkg install --auto --no-docs ../langs/
 
-    - name: Run prefix before mug
+    - name: Run prefix before mountebank
       run: |
         xvfb-run raco test \
           abscond \
@@ -150,21 +150,20 @@ jobs:
           iniquity \
           jig \
           knock \
-          loot \
-          mountebank
+          loot
 
-    - name: Run mug define tests
-      id: mug-define
+    - name: Run mountebank compile tests
+      id: mountebank-compile
       continue-on-error: true
       run: |
-        xvfb-run raco test mug/test/define-tests.rkt
+        xvfb-run raco test mountebank/test/run-compile-tests.rkt
 
-    - name: Rerun mug define tests with JIT trace
-      if: steps.mug-define.outcome == 'failure'
+    - name: Rerun mountebank compile tests with JIT trace
+      if: steps.mountebank-compile.outcome == 'failure'
       env:
         A86_JIT_TRACE: "1"
       run: |
-        xvfb-run raco test mug/test/define-tests.rkt
+        xvfb-run raco test mountebank/test/run-compile-tests.rkt
 
   debug-jig-prefix:
     runs-on: ubuntu-22.04
