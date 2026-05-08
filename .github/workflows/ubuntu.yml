@@ -150,7 +150,8 @@ jobs:
           iniquity \
           jig \
           knock \
-          loot
+          loot \
+          mountebank
 
     - name: Run mug define tests
       id: mug-define
@@ -200,7 +201,7 @@ jobs:
       run: |
         raco pkg install --auto --no-docs ../langs/
 
-    - name: Run prefix before jig
+    - name: Run prefix through hoax
       run: |
         xvfb-run raco test \
           abscond \
@@ -211,12 +212,38 @@ jobs:
           evildoer \
           extort \
           fraud \
-          hoax \
-          hustle \
-          iniquity
+          hoax
+
+    - name: Run hustle tests
+      id: hustle-prefix
+      continue-on-error: true
+      run: |
+        xvfb-run raco test hustle
+
+    - name: Rerun hustle tests with JIT trace
+      if: steps.hustle-prefix.outcome == 'failure'
+      env:
+        A86_JIT_TRACE: "1"
+      run: |
+        xvfb-run raco test hustle
+
+    - name: Run iniquity tests
+      id: iniquity-prefix
+      if: steps.hustle-prefix.outcome != 'failure'
+      continue-on-error: true
+      run: |
+        xvfb-run raco test iniquity
+
+    - name: Rerun iniquity tests with JIT trace
+      if: steps.iniquity-prefix.outcome == 'failure'
+      env:
+        A86_JIT_TRACE: "1"
+      run: |
+        xvfb-run raco test iniquity
 
     - name: Run jig define tests
       id: jig-define
+      if: steps.hustle-prefix.outcome != 'failure' && steps.iniquity-prefix.outcome != 'failure'
       continue-on-error: true
       run: |
         xvfb-run raco test jig/test/define-tests.rkt
