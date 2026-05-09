@@ -16,11 +16,13 @@
      (prog (Global 'entry)
            (Label 'entry)
            (Push rbx)    ; save callee-saved register
+
            (Push r15)
            (Mov rbx rdi) ; recv heap pointer
 
            (compile-e e '() #f)
            (Pop r15)     ; restore callee-save register
+
            (Pop rbx)
            (Ret)
            (compile-defines ds)

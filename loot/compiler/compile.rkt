@@ -23,6 +23,7 @@
      (prog (Global 'entry)
            (Label 'entry)
            (Push rbx)    ; save callee-saved register
+
            (Push r15)
            (Mov rbx rdi) ; recv heap pointer
 
@@ -30,6 +31,7 @@
            (compile-e e (reverse (define-ids ds)) #f)
            (Add rsp (* 8 (length ds))) ;; pop function definitions
            (Pop r15)     ; restore callee-save register
+
            (Pop rbx)
            (Ret)
            (compile-defines ds)
