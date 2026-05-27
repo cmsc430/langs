@@ -19,15 +19,20 @@ jobs:
     steps:
 
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@main
 
     - name: Install Racket
-      uses: Bogdanp/setup-racket@v1.14
+      uses: Bogdanp/setup-racket@v1.15
       with:
         architecture: 'x64'
         distribution: 'full'
         variant: ${{ matrix.racket-variant }}
         version: ${{ matrix.racket-version }}
+
+    - name: Install LLVM
+      uses: ZhongRuoyu/setup-llvm@v0
+      with:
+        llvm-version: 22
 
     - name: Version info
       run: |
@@ -36,15 +41,11 @@ jobs:
         clang --version
         gcc --version
 
-    - name: Cache Racket packages
-      uses: actions/cache@v4
-      with:
-        path: |
-          ~/.racket
-          ~/.cache/racket
-          ~/.local/share/racket
-          ~/Library/Caches/Racket
-        key: racket-${{ matrix.racket-variant }}-${{ matrix.racket-version }}-${{ matrix.os }}
+    # Temporary: install the next branch of a86 while this is in development
+    # Once merged in main, remove this and let it grab main branch by default
+    - name: Install a86 next branch
+      run: |
+        raco pkg install --auto 'https://github.com/cmsc430/a86.git?#next'
 
     - name: Install langs package
       run: |

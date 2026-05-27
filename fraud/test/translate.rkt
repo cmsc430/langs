@@ -1,7 +1,7 @@
 #lang racket
-(require "../translate.rkt")
-(require "../parse.rkt")
-(require "../ast.rkt")
+(require "../syntax/translate.rkt")
+(require "../syntax/parse.rkt")
+(require "../syntax/ast.rkt")
 (require rackunit)
 (check-equal? (translate (parse '(let ((x 0)) x)))
               (Let '_ (Lit 0) (Var 0)))

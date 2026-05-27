@@ -10,8 +10,7 @@ objs = \
 	main.o \
 	print.o \
 	values.o \
-	io.o \
-	symbol.o
+	io.o
 
 default: runtime.o
 

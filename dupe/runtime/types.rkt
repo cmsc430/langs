@@ -1,0 +1,16 @@
+#lang racket
+(provide (all-defined-out))
+(define int-shift    1)
+(define mask-int   #b1)
+(define type-int   #b0)
+
+;; Value -> Integer
+
+(define (value->bits v)
+  (cond [(eq? v #t) #b01]
+        [(eq? v #f) #b11]
+        [(integer? v) (arithmetic-shift v int-shift)]))
+
+(define (int-bits? v)
+  (= type-int (bitwise-and v mask-int)))
+

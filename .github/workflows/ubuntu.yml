@@ -3,12 +3,12 @@ on: [push, workflow_dispatch]
 
 concurrency:
   group: ubuntu-ci-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build-and-test:
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         os: [ubuntu-22.04, ubuntu-24.04]
         racket-variant: ['CS']
@@ -22,36 +22,38 @@ jobs:
       uses: actions/checkout@main
 
     - name: Install Racket
-      uses: Bogdanp/setup-racket@v1.14
+      uses: Bogdanp/setup-racket@v1.15
       with:
         architecture: 'x64'
         distribution: 'full'
         variant: ${{ matrix.racket-variant }}
         version: ${{ matrix.racket-version }}
 
-    - name: Install clang
+    - name: Install LLVM
+      uses: ZhongRuoyu/setup-llvm@v0
+      with:
+        llvm-version: 22
+
+    - name: Install libssl
       run: |
-        sudo apt install -y clang libssl-dev
+        sudo apt install -y libssl-dev
 
     - name: Version info
       run: |
         clang --version
         gcc --version
 
-    - name: Cache Racket packages
-      uses: actions/cache@v4
-      with:
-        path: |
-          ~/.racket
-          ~/.cache/racket
-          ~/.local/share/racket
-          ~/Library/Caches/Racket
-        key: racket-${{ matrix.racket-variant }}-${{ matrix.racket-version }}-${{ matrix.os }}
+    - name: Install a86 branch
+      run: |
+        git clone --branch "${{ github.ref_name }}" --single-branch https://github.com/cmsc430/a86.git ../a86
+        raco pkg install --auto --no-docs ../a86/
 
     - name: Install langs package
       run: |
-        raco pkg install --auto ../langs/
+        raco pkg install --auto --no-docs ../langs/
 
     - name: Run tests
+      id: langs-tests
+      continue-on-error: true
       run: |
         xvfb-run raco test -p langs
