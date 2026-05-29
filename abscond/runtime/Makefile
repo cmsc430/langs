@@ -8,9 +8,7 @@ endif
 
 CFLAGS   += -fPIC -g
 
-OBJS = \
-	main.o \
-	print.o
+OBJS = main.o
 
 default: runtime.o
 
