@@ -12,8 +12,3 @@
           [(Lit i) (Mov rax i)])
         (Ret)))
 
-;; Expr -> Asm
-(define (compile-e e)
-  (match e
-    [(Lit i) (seq (Mov rax i))]))
-
