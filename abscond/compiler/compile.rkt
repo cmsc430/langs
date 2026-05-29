@@ -1,6 +1,5 @@
 #lang racket
-(provide compile
-         compile-e)
+(provide compile)
 
 (require "../syntax/ast.rkt")
 (require a86/ast a86/registers)
@@ -9,7 +8,8 @@
 (define (compile e)
   (prog (Global 'entry)
         (Label 'entry)
-        (compile-e e)
+        (match e
+          [(Lit i) (Mov rax i)])
         (Ret)))
 
 ;; Expr -> Asm
