@@ -6,10 +6,9 @@ else
   LANGS_AS ?= clang -c
 endif
 
-CFLAGS   += -fPIC -g
+CFLAGS   += -g
 
-OBJS = \
-	main.o \
+OBJS = 	main.o \
 	print.o \
 	values.o
 
