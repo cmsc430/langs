@@ -6,11 +6,9 @@ else
   LANGS_AS ?= clang -c
 endif
 
-CFLAGS   += -fPIC -g
+CFLAGS   += -g
 
-OBJS = \
-	main.o \
-	print.o
+OBJS = main.o
 
 default: runtime.o
 
