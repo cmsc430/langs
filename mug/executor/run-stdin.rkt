@@ -8,5 +8,6 @@
 ;; Compile contents of stdin and use asm-interp to run
 (define (main)
   (read-line) ; ignore #lang racket line
+
   (run (compile (parse (read)))))
 
