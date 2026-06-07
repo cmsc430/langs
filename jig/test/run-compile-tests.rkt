@@ -1,8 +1,7 @@
 #lang racket
-(require "../compiler/compile.rkt")
 (require "../syntax/parse.rkt")
-(require "../executor/run.rkt")
+(require "../executor/exec.rkt")
 (require "define-tests.rkt")
-(test (λ p (run (compile (apply parse-closed p)))))
-(test/io (λ (in . p) (run/io (compile (apply parse-closed p)) in)))
+(test (λ p (exec (apply parse-closed p))))
+(test/io (λ (in . p) (exec/io (apply parse-closed p) in)))
 

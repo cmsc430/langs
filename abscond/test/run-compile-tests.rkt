@@ -1,6 +1,6 @@
 #lang racket
-(require "../compiler/compile.rkt")
 (require "../syntax/parse.rkt")
+(require "../compiler/compile.rkt")
 (require "define-tests.rkt")
 (require a86/interp)
 

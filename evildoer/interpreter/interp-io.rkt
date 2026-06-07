@@ -5,8 +5,9 @@
 ;; String Expr -> (Cons Value String)
 ;; Interpret e with given string as input,
 ;; return value and collected output as string
-(define (interp/io e in)
-  (parameterize ((current-output-port (open-output-string))
-                 (current-input-port  (open-input-string in)))
+(define (interp/io e input)
+  (parameterize ((current-input-port (open-input-string input))
+                 (current-output-port (open-output-string)))
     (cons (interp e)
           (get-output-string (current-output-port)))))
+

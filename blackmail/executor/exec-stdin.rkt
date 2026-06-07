@@ -1,12 +1,11 @@
 #lang racket
 (provide main)
 (require "../syntax/parse.rkt")
-(require "../compiler/compile.rkt")
-(require a86/interp)
+(require "exec.rkt")
 
-;; -> Void
-;; Compile contents of stdin and use asm-interp to run
+;; -> Value
+;; Parse, compile, and execute contents of stdin
 (define (main)
   (read-line) ; ignore #lang racket line
-  (asm-interp (compile (parse (read)))))
+  (exec (parse (read))))
 

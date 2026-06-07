@@ -1,5 +1,4 @@
 #lang racket
-(require "../compiler/compile.rkt")
 (require "../syntax/parse.rkt")
 (require "../executor/exec.rkt")
 (require "define-tests.rkt")

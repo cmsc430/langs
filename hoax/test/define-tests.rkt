@@ -63,7 +63,7 @@
     (check-equal? (run '(begin (integer->char 97)
                                (integer->char 98)))
                   #\b))
-
+  
   (begin ;; Fraud
     (check-equal? (run '(let ((x 7)) x)) 7)
     (check-equal? (run '(let ((x 7)) 2)) 2)
