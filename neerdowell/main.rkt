@@ -6,7 +6,6 @@
 (require "compiler/compile.rkt")
 (require "runtime/types.rkt")
 (require "executor/decode.rkt")
-(require "executor/run.rkt")
 (require "executor/exec.rkt")
 (provide (all-from-out "syntax/ast.rkt"))
 (provide (all-from-out "syntax/parse.rkt"))
@@ -15,6 +14,5 @@
 (provide (all-from-out "compiler/compile.rkt"))
 (provide (all-from-out "runtime/types.rkt"))
 (provide (all-from-out "executor/decode.rkt"))
-(provide (all-from-out "executor/run.rkt"))
 (provide (all-from-out "executor/exec.rkt"))
 
