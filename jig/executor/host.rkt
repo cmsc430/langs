@@ -17,7 +17,7 @@
   (raise 'err))
 
 (define heap
-  (malloc 10000))
+  (malloc 10000 'raw))
 
 (define (asm-interp/host asm)  
   (parameterize
