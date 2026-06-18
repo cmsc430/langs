@@ -19,6 +19,9 @@
 (define heap
   (malloc 10000 'raw))
 
+(unless (zero? (remainder (cast heap _pointer _int64) 4))
+  (error "heap alignment false!"))
+
 (define (asm-interp/host asm)  
   (parameterize
       ([current-externs
