@@ -16,21 +16,20 @@
 ;; | (box Value)
 ;; | (string Character ...)
 ;; | (vector Value ...)
-;; | (Value ... -> Answer)
+;; | ([Listof Value] -> Value { raises 'err })
 
 ;; type Answer = Value | 'err
 
 ;; type Env = (Listof (List Id Value))
 
 (define (err? x) (eq? x 'err))
-;; ClosedExpr -> Answer
-;; Prog -> Answer
+;; ClosedProg -> Answer
 (define (interp p)
   (with-handlers ([err? identity])
     (match p
       [(Prog ds e)
        (interp-e e '() ds)])))
-;l Expr Env Defns -> Value { raises 'err }
+;; Expr Env Defns -> Value { raises 'err }
 (define (interp-e e r ds) ;; where r closes e
   (match e
     [(Var x) (interp-var x r ds)]
@@ -63,19 +62,19 @@
      (let ((f (interp-e e r ds))
            (vs (interp-e* es r ds)))
        (if (procedure? f)
-           (apply f vs)
+           (f vs)
            (raise 'err)))]
     [(Match e ps es)
      (let ((v (interp-e e r ds)))
        (interp-match v ps es r ds))]
     [(Lam f xs e)
-     (λ vs
+     (λ (vs)
        ; check arity matches
        (if (= (length xs) (length vs))
            (interp-e e (append (zip xs vs) r) ds)
            (raise 'err)))]))
 
-;; (Listof Expr) REnv Defns -> (Listof Value) { raises 'err }
+;; (Listof Expr) Env Defns -> (Listof Value) { raises 'err }
 (define (interp-e* es r ds)
   (match es
     ['() '()]
@@ -91,10 +90,11 @@
             [#f 'err])]
     [v v]))
 
-;; Value [Listof Pat] [Listof Expr] Env Defns -> Answer
+;; Value [Listof Pat] [Listof Expr] Env Defns
+;;  -> Value { raises 'err }
 (define (interp-match v ps es r ds)
   (match* (ps es)
-    [('() '()) 'err]
+    [('() '()) (raise 'err)]
     [((cons p ps) (cons e es))
      (match (interp-match-pat p v r)
        [#f (interp-match v ps es r ds)]
@@ -126,11 +126,4 @@
 (define (defns-lookup ds f)
   (findf (match-lambda [(Defn g _ _) (eq? f g)])
          ds))
-
-(define (zip xs ys)
-  (match* (xs ys)
-    [('() '()) '()]
-    [((cons x xs) (cons y ys))
-     (cons (list x y)
-           (zip xs ys))]))
 
