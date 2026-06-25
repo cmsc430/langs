@@ -22,14 +22,13 @@
 ;; type Env = (Listof (List Id Value))
 
 (define (err? x) (eq? x 'err))
-;; ClosedExpr -> Answer
-;; Prog -> Answer
+;; ClosedProg -> Answer
 (define (interp p)
   (with-handlers ([err? identity])
     (match p
       [(Prog ds e)
        (interp-e e '() ds)])))
-;l Expr Env Defns -> Value { raises 'err }
+;; Expr Env Defns -> Value { raises 'err }
 (define (interp-e e r ds) ;; where r closes e
   (match e
     [(Var x) (lookup r x)]
@@ -70,7 +69,7 @@
      (let ((v (interp-e e r ds)))
        (interp-match v ps es r ds))]))
 
-;; (Listof Expr) REnv Defns -> (Listof Value) { raises 'err }
+;; (Listof Expr) Env Defns -> (Listof Value) { raises 'err }
 (define (interp-e* es r ds)
   (match es
     ['() '()]
@@ -78,10 +77,11 @@
      (cons (interp-e e r ds)
            (interp-e* es r ds))]))
 
-;; Value [Listof Pat] [Listof Expr] Env Defns -> Answer
+;; Value [Listof Pat] [Listof Expr] Env Defns
+;;  -> Value { raises 'err }
 (define (interp-match v ps es r ds)
   (match* (ps es)
-    [('() '()) 'err]
+    [('() '()) (raise 'err)]
     [((cons p ps) (cons e es))
      (match (interp-match-pat p v r)
        [#f (interp-match v ps es r ds)]
@@ -110,15 +110,9 @@
        [#f #f]
        [r1 (interp-match-pat p2 v r1)])]))
 
+
 ;; Defns Symbol -> Defn
 (define (defns-lookup ds f)
   (findf (match-lambda [(Defn g _ _) (eq? f g)])
          ds))
-
-(define (zip xs ys)
-  (match* (xs ys)
-    [('() '()) '()]
-    [((cons x xs) (cons y ys))
-     (cons (list x y)
-           (zip xs ys))]))
 

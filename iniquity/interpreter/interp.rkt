@@ -21,14 +21,13 @@
 ;; type Env = (Listof (List Id Value))
 
 (define (err? x) (eq? x 'err))
-;; ClosedExpr -> Answer
-;; Prog -> Answer
+;; ClosedProg -> Answer
 (define (interp p)
   (with-handlers ([err? identity])
     (match p
       [(Prog ds e)
        (interp-e e '() ds)])))
-;l Expr Env Defns -> Value { raises 'err }
+;; Expr Env Defns -> Value { raises 'err }
 (define (interp-e e r ds) ;; where r closes e
   (match e
     [(Var x) (lookup r x)]
@@ -66,7 +65,7 @@
                (interp-e e (zip xs vs) ds)
                (raise 'err))]))]))
 
-;; (Listof Expr) REnv Defns -> (Listof Value) { raises 'err }
+;; (Listof Expr) Env Defns -> (Listof Value) { raises 'err }
 (define (interp-e* es r ds)
   (match es
     ['() '()]
@@ -78,11 +77,4 @@
 (define (defns-lookup ds f)
   (findf (match-lambda [(Defn g _ _) (eq? f g)])
          ds))
-
-(define (zip xs ys)
-  (match* (xs ys)
-    [('() '()) '()]
-    [((cons x xs) (cons y ys))
-     (cons (list x y)
-           (zip xs ys))]))
 
