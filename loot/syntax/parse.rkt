@@ -70,8 +70,10 @@
         (match (parse-prog ss xs ys)
           [(list ys (Prog ds e))
            (list ys (Prog (cons d ds) e))])])]))
+
 ;; S-Expr [Listof Id] [Listof Id] [Listof Id] [Listof Id] -> (list [Listof Id] Defn)
 ;;   s: definition shaped s-expr to be parsed
+;;   fs: defined function names
 ;;   xs: bound variables
 ;;   ys: free variables
 ;; returns list of free variables and parse of definition

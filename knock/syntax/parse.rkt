@@ -81,7 +81,6 @@
 ;;   ys: free variables
 ;;   gs: undefined function names
 ;; returns list of free variables, undefined function names, and parse of definition
-;; returns list of free variables and parse of definition
 (define (parse-define/acc s fs xs ys gs)
   (match s
     [(cons 'define sr)
