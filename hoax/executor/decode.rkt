@@ -32,7 +32,7 @@
            (build-string (bits->value (mem-ref p))
                          (lambda (j)
                            (integer->char (mem-ref32 (+ p 8 (* 4 j)))))))]
-        [else (error "invalid bits" b)]))
+        [else (error "invalid bits")]))
 
 (define (mem-ref i)
   (ptr-ref (cast i _int64 _pointer) _int64))
